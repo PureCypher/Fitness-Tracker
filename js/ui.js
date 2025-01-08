@@ -32,6 +32,8 @@ class UIManager {
             settings.units = weightUnitSelect.value;
             storage.saveSettings(settings);
             this.updateWeightUnitDisplays(settings.units);
+            // Dispatch event for weight unit change
+            document.dispatchEvent(new Event('weightUnitChanged'));
         });
 
         // Data management

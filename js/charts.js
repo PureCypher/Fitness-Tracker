@@ -31,7 +31,7 @@ class ChartManager {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Weight (lbs)'
+                            text: `Weight (${storage.getSettings().units})`
                         }
                     }
                 }
@@ -243,7 +243,11 @@ class ChartManager {
             if (!exerciseData[entry.exercise][date]) {
                 exerciseData[entry.exercise][date] = [];
             }
-            const maxWeight = Math.max(...entry.sets.map(set => set.weight));
+            const unit = storage.getSettings().units;
+            const maxWeight = Math.max(...entry.sets.map(set => {
+                const weight = set.weight;
+                return unit === 'kg' ? WeightConverter.lbsToKg(weight) : weight;
+            }));
             exerciseData[entry.exercise][date].push(maxWeight);
         });
 
@@ -469,5 +473,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('goalsUpdated', () => {
         window.chartManager.updateGoalsChart();
+    });
+
+    // Update strength chart when weight unit changes
+    document.addEventListener('weightUnitChanged', () => {
+        const unit = storage.getSettings().units;
+        window.chartManager.charts.strength.options.scales.y.title.text = `Weight (${unit})`;
+        window.chartManager.updateStrengthChart();
     });
 });
