@@ -81,7 +81,7 @@ function loadUserSettings() {
 function loadDailyIntake() {
     // Reset daily intake if it's a new day
     const lastUpdate = localStorage.getItem('lastWaterUpdate');
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toDateString();
     
     if (lastUpdate !== today) {
         storage.resetDailyWaterIntake();

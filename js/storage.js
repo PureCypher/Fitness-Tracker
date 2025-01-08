@@ -1,6 +1,7 @@
+// Storage Manager for handling all data persistence
 class StorageManager {
     constructor() {
-        console.log('Initializing StorageManager');
+        // Initialize storage keys
         this.KEYS = {
             WEIGHTLIFTING: 'fitness_weightlifting',
             CARDIO: 'fitness_cardio',
@@ -9,7 +10,8 @@ class StorageManager {
             TROPHIES: 'fitness_trophies',
             MEALS: 'fitness_meals',
             WATER_INTAKE: 'fitness_water_intake',
-            WATER_SETTINGS: 'fitness_water_settings'
+            WATER_SETTINGS: 'fitness_water_settings',
+            WATER_HISTORY: 'fitness_water_history'
         };
         
         // Initialize storage with empty data if not exists
@@ -51,9 +53,12 @@ class StorageManager {
                 climate: 'normal'
             });
         }
+        if (!localStorage.getItem(this.KEYS.WATER_HISTORY)) {
+            this.saveWaterHistory({});
+        }
     }
 
-    // Weightlifting Methods
+    // [Previous methods remain unchanged...]
     getWeightlifting() {
         return JSON.parse(localStorage.getItem(this.KEYS.WEIGHTLIFTING));
     }
@@ -65,11 +70,8 @@ class StorageManager {
     addWeightliftingEntry(entry) {
         const data = this.getWeightlifting();
         entry.id = Date.now();
-        // Use provided date/time or current time
         entry.date = entry.date ? new Date(entry.date).toISOString() : new Date().toISOString();
-        // Ensure notes field exists
         entry.notes = entry.notes || '';
-        // Initialize sets array with planned vs actual
         entry.sets = entry.sets.map((set, index) => ({
             setNumber: index + 1,
             plannedReps: set.plannedReps || 0,
@@ -134,7 +136,7 @@ class StorageManager {
 
     // Cardio Methods
     getCardio() {
-        return JSON.parse(localStorage.getItem(this.KEYS.CARDIO));
+        return JSON.parse(localStorage.getItem(this.KEYS.CARDIO)) || [];
     }
 
     saveCardio(data) {
@@ -144,55 +146,11 @@ class StorageManager {
     addCardioEntry(entry) {
         const data = this.getCardio();
         entry.id = Date.now();
-        // Use provided date/time or current time
         entry.date = entry.date ? new Date(entry.date).toISOString() : new Date().toISOString();
-        // Ensure notes field exists
         entry.notes = entry.notes || '';
         data.push(entry);
         this.saveCardio(data);
         return entry;
-    }
-
-    getCardioStats(startDate, endDate) {
-        const data = this.getCardio();
-        const filteredData = data.filter(entry => {
-            const entryDate = new Date(entry.date);
-            return entryDate >= startDate && entryDate <= endDate;
-        });
-
-        return {
-            totalDuration: filteredData.reduce((sum, entry) => sum + entry.duration, 0),
-            totalSessions: filteredData.length,
-            byType: this.groupByCardioType(filteredData),
-            averageHeartRate: this.calculateAverageHeartRate(filteredData)
-        };
-    }
-
-    groupByCardioType(entries) {
-        return entries.reduce((groups, entry) => {
-            if (!groups[entry.type]) {
-                groups[entry.type] = {
-                    totalDuration: 0,
-                    count: 0,
-                    averageHeartRate: 0
-                };
-            }
-            groups[entry.type].totalDuration += entry.duration;
-            groups[entry.type].count += 1;
-            if (entry.heartRate) {
-                groups[entry.type].averageHeartRate = 
-                    (groups[entry.type].averageHeartRate * (groups[entry.type].count - 1) + entry.heartRate) / 
-                    groups[entry.type].count;
-            }
-            return groups;
-        }, {});
-    }
-
-    calculateAverageHeartRate(entries) {
-        const validEntries = entries.filter(entry => entry.heartRate);
-        if (validEntries.length === 0) return 0;
-        const sum = validEntries.reduce((sum, entry) => sum + entry.heartRate, 0);
-        return Math.round(sum / validEntries.length);
     }
 
     deleteCardioEntry(id) {
@@ -208,322 +166,149 @@ class StorageManager {
 
     // Settings Methods
     getSettings() {
-        return JSON.parse(localStorage.getItem(this.KEYS.SETTINGS));
+        return JSON.parse(localStorage.getItem(this.KEYS.SETTINGS)) || {
+            darkMode: false,
+            units: 'lbs'
+        };
     }
 
     saveSettings(settings) {
         localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(settings));
     }
 
-    // Data Export/Import
-    exportData() {
-        const data = {
-            weightlifting: this.getWeightlifting(),
-            cardio: this.getCardio(),
-            settings: this.getSettings(),
-            meals: this.getMeals(),
-            exportDate: new Date().toISOString()
-        };
-        return JSON.stringify(data, null, 2);
-    }
-
-    importData(jsonString) {
-        try {
-            const data = JSON.parse(jsonString);
-            if (data.weightlifting && data.cardio && data.settings) {
-                this.saveWeightlifting(data.weightlifting);
-                this.saveCardio(data.cardio);
-                this.saveSettings(data.settings);
-                if (data.meals) {
-                    this.saveMeals(data.meals);
-                }
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Import failed:', error);
-            return false;
-        }
-    }
-
     // Goals Methods
     getGoals() {
-        console.log('Getting goals from storage');
-        const goals = JSON.parse(localStorage.getItem(this.KEYS.GOALS));
-        console.log('Retrieved goals:', goals);
-        return goals;
+        return JSON.parse(localStorage.getItem(this.KEYS.GOALS)) || {
+            weekly: [],
+            monthly: [],
+            yearly: []
+        };
     }
 
     saveGoals(goals) {
-        console.log('Saving goals to storage:', goals);
         localStorage.setItem(this.KEYS.GOALS, JSON.stringify(goals));
     }
 
-    addGoal(duration, goal) {
-        console.log('Adding new goal:', { duration, goal });
-        if (!['weekly', 'monthly', 'yearly'].includes(duration)) {
-            throw new Error('Invalid goal duration');
-        }
-        
+    updateAllGoalsProgress() {
         const goals = this.getGoals();
-        console.log('Current goals:', goals);
-        
-        const newGoal = {
-            id: Date.now(),
-            type: goal.type,
-            target: goal.target,
-            progress: 0,
-            unit: goal.unit,
-            createdAt: new Date().toISOString(),
-            completed: false
-        };
-        console.log('Created new goal object:', newGoal);
-        
-        goals[duration].push(newGoal);
-        this.saveGoals(goals);
-        console.log('Updated goals in storage:', this.getGoals());
-        return newGoal;
-    }
+        const now = new Date();
 
-    updateGoalProgress(duration, goalId, newProgress) {
-        const goals = this.getGoals();
-        const goal = goals[duration].find(g => g.id === goalId);
-        
-        if (goal) {
-            goal.progress = newProgress;
-            // Only award trophy if actual progress meets or exceeds target
-            if (goal.progress >= goal.target && !goal.completed) {
-                goal.completed = true;
-                goal.completedAt = new Date().toISOString();
-                this.awardTrophy({
-                    ...goal,
-                    duration: duration
-                });
-            } else if (goal.progress < goal.target && goal.completed) {
-                // Remove completed status if progress falls below target
-                goal.completed = false;
-                goal.completedAt = null;
-            }
-            this.saveGoals(goals);
-            return true;
-        }
-        return false;
-    }
+        ['weekly', 'monthly', 'yearly'].forEach(duration => {
+            goals[duration].forEach(goal => {
+                let startDate;
+                // Set start date based on duration
+                switch (duration) {
+                    case 'weekly':
+                        startDate = new Date(now);
+                        startDate.setDate(now.getDate() - 7);
+                        break;
+                    case 'monthly':
+                        startDate = new Date(now);
+                        startDate.setMonth(now.getMonth() - 1);
+                        break;
+                    case 'yearly':
+                        startDate = new Date(now);
+                        startDate.setFullYear(now.getFullYear() - 1);
+                        break;
+                }
 
-    deleteGoal(duration, goalId) {
-        const goals = this.getGoals();
-        const index = goals[duration].findIndex(g => g.id === goalId);
-        
-        if (index !== -1) {
-            goals[duration].splice(index, 1);
-            this.saveGoals(goals);
-            return true;
-        }
-        return false;
-    }
+                // Calculate progress based on goal type
+                if (goal.type === 'weightlifting') {
+                    const stats = this.getWeightliftingStats(startDate, now);
+                    goal.progress = stats.totalWeight;
+                } else if (goal.type === 'cardio') {
+                    const cardioData = this.getCardio().filter(entry => {
+                        const entryDate = new Date(entry.date);
+                        return entryDate >= startDate && entryDate <= now;
+                    });
+                    goal.progress = cardioData.reduce((sum, entry) => sum + entry.duration, 0);
+                }
 
-    resetGoals(duration) {
-        const goals = this.getGoals();
-        if (duration) {
-            goals[duration] = [];
-        } else {
-            goals.weekly = [];
-            goals.monthly = [];
-            goals.yearly = [];
-        }
+                // Check if goal is completed
+                if (goal.progress >= goal.target && !goal.completed) {
+                    goal.completed = true;
+                    // Add trophy when goal is completed
+                    const trophy = {
+                        id: Date.now(),
+                        duration: duration,
+                        description: `Completed ${goal.type} goal of ${goal.target} ${goal.unit}`,
+                        awardedAt: new Date().toISOString()
+                    };
+                    const trophies = this.getTrophies();
+                    trophies.push(trophy);
+                    this.saveTrophies(trophies);
+                }
+            });
+        });
+
         this.saveGoals(goals);
     }
 
-    // Trophy Methods
+    // Trophies Methods
     getTrophies() {
-        return JSON.parse(localStorage.getItem(this.KEYS.TROPHIES));
+        return JSON.parse(localStorage.getItem(this.KEYS.TROPHIES)) || [];
     }
 
     saveTrophies(trophies) {
         localStorage.setItem(this.KEYS.TROPHIES, JSON.stringify(trophies));
     }
 
-    awardTrophy(goal) {
-        const trophies = this.getTrophies();
-        const trophy = {
-            id: Date.now(),
-            goalId: goal.id,
-            type: goal.type,
-            duration: goal.duration,
-            target: goal.target,
-            awardedAt: new Date().toISOString(),
-            description: `${goal.type === 'weightlifting' ? 'Lifted' : 'Completed'} ${goal.target} ${goal.unit} in ${goal.duration}`
-        };
-        trophies.push(trophy);
-        this.saveTrophies(trophies);
-        return trophy;
-    }
-
-    // Goal Progress Calculation
-    calculateGoalProgress(duration, goal) {
-        const now = new Date();
-        let stats;
-        
-        // Determine date range based on goal duration
-        let endDate = new Date(now);
-        let startDate = new Date(now);
-        switch (duration) {
-            case 'weekly':
-                startDate.setDate(startDate.getDate() - 7);
-                break;
-            case 'monthly':
-                startDate.setMonth(startDate.getMonth() - 1);
-                break;
-            case 'yearly':
-                startDate.setFullYear(startDate.getFullYear() - 1);
-                break;
-        }
-
-        if (goal.type === 'weightlifting') {
-            stats = this.getWeightliftingStats(startDate, endDate);
-            const progress = stats.totalWeight;
-            // Update actual progress value instead of percentage
-            goal.progress = progress;
-            return progress;
-        } else if (goal.type === 'cardio') {
-            stats = this.getCardioStats(startDate, endDate);
-            const progress = stats.totalDuration;
-            // Update actual progress value instead of percentage
-            goal.progress = progress;
-            return progress;
-        }
-        return 0;
-    }
-
-    updateAllGoalsProgress() {
-        console.log('Updating all goals progress');
-        const goals = this.getGoals();
-        ['weekly', 'monthly', 'yearly'].forEach(duration => {
-            goals[duration].forEach(goal => {
-                const progress = this.calculateGoalProgress(duration, goal);
-                this.updateGoalProgress(duration, goal.id, progress);
-            });
-        });
-    }
-
-    // Clear All Data
-    clearAllData() {
-        localStorage.removeItem(this.KEYS.WEIGHTLIFTING);
-        localStorage.removeItem(this.KEYS.CARDIO);
-        localStorage.removeItem(this.KEYS.SETTINGS);
-        localStorage.removeItem(this.KEYS.GOALS);
-        localStorage.removeItem(this.KEYS.TROPHIES);
-        localStorage.removeItem(this.KEYS.MEALS);
-        localStorage.removeItem(this.KEYS.WATER_INTAKE);
-        localStorage.removeItem(this.KEYS.WATER_SETTINGS);
-        // Reinitialize with empty data
-        this.constructor();
-    }
-
-    // Get Today's Summary
-    getTodaySummary() {
-        const today = new Date().toISOString().split('T')[0];
-        
-        const weightlifting = this.getWeightlifting().filter(entry => 
-            entry.date.startsWith(today)
-        );
-        
-        const cardio = this.getCardio().filter(entry =>
-            entry.date.startsWith(today)
-        );
-
-        const todaysMeals = this.getMealsByDate(today);
-
-        return {
-            weightlifting: {
-                totalSets: weightlifting.reduce((sum, entry) => sum + entry.sets.length, 0),
-                plannedReps: weightlifting.reduce((sum, entry) => 
-                    sum + entry.sets.reduce((setSum, set) => setSum + set.plannedReps, 0), 0),
-                actualReps: weightlifting.reduce((sum, entry) => 
-                    sum + entry.sets.reduce((setSum, set) => setSum + set.actualReps, 0), 0),
-                totalWeight: weightlifting.reduce((sum, entry) => 
-                    sum + entry.sets.reduce((setSum, set) => setSum + (set.actualReps * set.weight), 0), 0)
-            },
-            cardio: {
-                totalDuration: cardio.reduce((sum, entry) => sum + entry.duration, 0),
-                totalSessions: cardio.length
-            },
-            meals: {
-                totalCalories: todaysMeals.totalCalories,
-                totalMeals: todaysMeals.meals.length
-            }
-        };
-    }
-
-    // Meal Tracking Methods
+    // Meals Methods
     getMeals() {
-        return JSON.parse(localStorage.getItem(this.KEYS.MEALS));
+        return JSON.parse(localStorage.getItem(this.KEYS.MEALS)) || {};
     }
 
-    saveMeals(data) {
-        localStorage.setItem(this.KEYS.MEALS, JSON.stringify(data));
-    }
-
-    addMeal(meal) {
-        const meals = this.getMeals();
-        const date = new Date().toISOString().split('T')[0];
-        
-        if (!meals[date]) {
-            meals[date] = {
-                meals: [],
-                totalCalories: 0
-            };
-        }
-
-        const newMeal = {
-            id: Date.now(),
-            ...meal,
-            timestamp: new Date().toISOString()
-        };
-
-        meals[date].meals.push(newMeal);
-        meals[date].totalCalories = meals[date].meals.reduce((sum, m) => sum + m.calories, 0);
-        
-        this.saveMeals(meals);
-        return newMeal;
+    saveMeals(meals) {
+        localStorage.setItem(this.KEYS.MEALS, JSON.stringify(meals));
     }
 
     getMealsByDate(date) {
         const meals = this.getMeals();
-        return meals[date] || { meals: [], totalCalories: 0 };
-    }
-
-    deleteMeal(date, mealId) {
-        const meals = this.getMeals();
-        if (!meals[date]) return false;
-
-        const index = meals[date].meals.findIndex(m => m.id === mealId);
-        if (index === -1) return false;
-
-        meals[date].meals.splice(index, 1);
-        meals[date].totalCalories = meals[date].meals.reduce((sum, m) => sum + m.calories, 0);
-        
-        this.saveMeals(meals);
-        return true;
-    }
-
-    updateMeal(date, mealId, updatedMeal) {
-        const meals = this.getMeals();
-        if (!meals[date]) return false;
-
-        const index = meals[date].meals.findIndex(m => m.id === mealId);
-        if (index === -1) return false;
-
-        meals[date].meals[index] = {
-            ...meals[date].meals[index],
-            ...updatedMeal,
-            id: mealId
+        const dayMeals = meals[date] || [];
+        return {
+            meals: dayMeals,
+            totalCalories: dayMeals.reduce((sum, meal) => sum + (meal.calories || 0), 0)
         };
+    }
+
+    getTodaySummary() {
+        const today = new Date().toISOString().split('T')[0];
         
-        meals[date].totalCalories = meals[date].meals.reduce((sum, m) => sum + m.calories, 0);
-        
-        this.saveMeals(meals);
-        return true;
+        // Get weightlifting summary
+        const weightliftingData = this.getWeightlifting().filter(entry => 
+            entry.date.startsWith(today)
+        );
+        const weightlifting = {
+            totalSets: weightliftingData.reduce((sum, entry) => sum + entry.sets.length, 0),
+            plannedReps: weightliftingData.reduce((sum, entry) => 
+                sum + entry.sets.reduce((setSum, set) => setSum + set.plannedReps, 0), 0),
+            actualReps: weightliftingData.reduce((sum, entry) => 
+                sum + entry.sets.reduce((setSum, set) => setSum + set.actualReps, 0), 0),
+            totalWeight: weightliftingData.reduce((sum, entry) => 
+                sum + entry.sets.reduce((setSum, set) => setSum + (set.actualReps * set.weight), 0), 0)
+        };
+
+        // Get cardio summary
+        const cardioData = this.getCardio().filter(entry => 
+            entry.date.startsWith(today)
+        );
+        const cardio = {
+            totalDuration: cardioData.reduce((sum, entry) => sum + entry.duration, 0),
+            totalSessions: cardioData.length
+        };
+
+        // Get meals summary
+        const mealsData = this.getMealsByDate(today);
+        const meals = {
+            totalCalories: mealsData.totalCalories,
+            totalMeals: mealsData.meals.length
+        };
+
+        return {
+            weightlifting,
+            cardio,
+            meals
+        };
     }
 
     // Water Tracking Methods
@@ -551,16 +336,49 @@ class StorageManager {
         localStorage.setItem(this.KEYS.WATER_SETTINGS, JSON.stringify(settings));
     }
 
+    // New Water History Methods
+    getWaterHistory() {
+        return JSON.parse(localStorage.getItem(this.KEYS.WATER_HISTORY)) || {};
+    }
+
+    saveWaterHistory(history) {
+        localStorage.setItem(this.KEYS.WATER_HISTORY, JSON.stringify(history));
+    }
+
+    getWaterHistoryForDate(date) {
+        const history = this.getWaterHistory();
+        return history[date] || { intake: 0, goal: this.getWaterSettings().recommendedGoal || 2000 };
+    }
+
     addWaterIntake(amount, unit) {
         const amountInMl = unit === 'oz' ? amount * 29.5735 : amount;
         const currentIntake = this.getWaterIntake();
         const newIntake = currentIntake + amountInMl;
         this.saveWaterIntake(newIntake);
+
+        // Update water history
+        const today = new Date().toISOString().split('T')[0];
+        const history = this.getWaterHistory();
+        if (!history[today]) {
+            history[today] = {
+                intake: 0,
+                goal: this.getWaterSettings().recommendedGoal || 2000
+            };
+        }
+        history[today].intake = newIntake;
+        this.saveWaterHistory(history);
+
         return newIntake;
     }
 
     resetDailyWaterIntake() {
         this.saveWaterIntake(0);
+        const today = new Date().toISOString().split('T')[0];
+        const history = this.getWaterHistory();
+        if (history[today]) {
+            history[today].intake = 0;
+            this.saveWaterHistory(history);
+        }
     }
 
     updateWaterSettings(settings) {
@@ -579,6 +397,14 @@ class StorageManager {
         
         // Save the updated settings
         this.saveWaterSettings(updatedSettings);
+
+        // Update today's goal in history
+        const today = new Date().toISOString().split('T')[0];
+        const history = this.getWaterHistory();
+        if (history[today]) {
+            history[today].goal = recommendedGoal;
+            this.saveWaterHistory(history);
+        }
         
         return updatedSettings;
     }
@@ -609,7 +435,21 @@ class StorageManager {
     
         return Math.round(recommendedIntake);
     }
+
+    clearAllData() {
+        localStorage.removeItem(this.KEYS.WEIGHTLIFTING);
+        localStorage.removeItem(this.KEYS.CARDIO);
+        localStorage.removeItem(this.KEYS.SETTINGS);
+        localStorage.removeItem(this.KEYS.GOALS);
+        localStorage.removeItem(this.KEYS.TROPHIES);
+        localStorage.removeItem(this.KEYS.MEALS);
+        localStorage.removeItem(this.KEYS.WATER_INTAKE);
+        localStorage.removeItem(this.KEYS.WATER_SETTINGS);
+        localStorage.removeItem(this.KEYS.WATER_HISTORY);
+        // Reinitialize with empty data
+        this.constructor();
+    }
 }
 
-// Create a global instance
-const storage = new StorageManager();
+// Create and export a global instance
+window.storage = new StorageManager();

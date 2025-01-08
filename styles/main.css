@@ -799,6 +799,36 @@ button:hover {
     margin-bottom: 0.5rem;
 }
 
+.water-history {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.water-history h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+#water-date {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+#water-history-display {
+    background: var(--background-secondary);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+#water-history-display p {
+    margin-bottom: 0.5rem;
+}
+
+#water-history-display .progress-bar {
+    margin: 1rem 0;
+}
+
 .input-group {
     display: flex;
     gap: 0.5rem;

@@ -98,7 +98,7 @@ class CalendarView {
         const container = InputValidator.createSafeElement('div');
         
         // Activity indicators
-        if (workouts.weightlifting.length || workouts.cardio.length || workouts.meals?.meals.length || workouts.water > 0) {
+        if (workouts.weightlifting.length || workouts.cardio.length || workouts.meals?.meals.length || workouts.water?.intake > 0) {
             const indicatorsDiv = InputValidator.createSafeElement('div', { class: 'workout-indicators' });
             
             if (workouts.weightlifting.length) {
@@ -116,7 +116,7 @@ class CalendarView {
                     { class: 'indicator meals' }
                 ));
             }
-            if (workouts.water > 0) {
+            if (workouts.water?.intake > 0) {
                 indicatorsDiv.appendChild(InputValidator.createSafeElement('span', 
                     { class: 'indicator water' }
                 ));
@@ -162,12 +162,38 @@ class CalendarView {
             hasContent = true;
         }
 
-        if (workouts.water > 0) {
+        if (workouts.water?.intake > 0) {
             const waterSection = InputValidator.createSafeElement('div', { class: 'workout-section' });
             waterSection.appendChild(InputValidator.createSafeElement('h5', {}, 'Water Intake'));
-            waterSection.appendChild(InputValidator.createSafeElement('div', { class: 'workout-entry' },
-                `Total Intake: ${workouts.water} ml`
+            
+            const waterEntry = InputValidator.createSafeElement('div', { class: 'workout-entry' });
+            
+            // Add intake and goal
+            const intakeDiv = InputValidator.createSafeElement('div', { class: 'water-stats' });
+            intakeDiv.appendChild(InputValidator.createSafeElement('div', {}, 
+                `Total Intake: ${workouts.water.intake} ml`
             ));
+            intakeDiv.appendChild(InputValidator.createSafeElement('div', {}, 
+                `Daily Goal: ${workouts.water.goal} ml`
+            ));
+            waterEntry.appendChild(intakeDiv);
+            
+            // Add progress bar
+            const progress = (workouts.water.intake / workouts.water.goal) * 100;
+            const progressBar = InputValidator.createSafeElement('div', { class: 'progress-bar' });
+            const progressFill = InputValidator.createSafeElement('div', { 
+                class: 'progress',
+                style: `width: ${Math.min(100, progress)}%`
+            });
+            progressBar.appendChild(progressFill);
+            waterEntry.appendChild(progressBar);
+            
+            // Add percentage
+            waterEntry.appendChild(InputValidator.createSafeElement('div', { class: 'progress-text' }, 
+                `${Math.round(progress)}% of daily goal`
+            ));
+            
+            waterSection.appendChild(waterEntry);
             container.appendChild(waterSection);
             hasContent = true;
         }
@@ -484,9 +510,8 @@ class CalendarManager {
             );
             const mealData = storage.getMealsByDate(dateStr);
 
-            // Get water intake for the date
-            const lastWaterUpdate = localStorage.getItem('lastWaterUpdate');
-            const waterIntake = lastWaterUpdate === dateStr ? storage.getWaterIntake() : 0;
+            // Get water history for the date
+            const waterData = storage.getWaterHistoryForDate(dateStr);
 
             // Combine all data into workouts object
             const workouts = {
@@ -494,7 +519,7 @@ class CalendarManager {
                 cardio: cardioEntries,
                 trophies: trophyEntries,
                 meals: mealData,
-                water: waterIntake
+                water: waterData
             };
 
             // Cache the combined data
