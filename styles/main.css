@@ -335,6 +335,10 @@ button:hover {
     background: var(--success-color);
 }
 
+.indicator.water {
+    background: #007bff;
+}
+
 .workout-details {
     background: var(--background-color);
     padding: 1rem;
@@ -766,6 +770,46 @@ button:hover {
     border-color: var(--primary-color);
     outline: none;
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Water Tracking Styles */
+.water-input {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.water-input input {
+    flex: 2;
+}
+
+.water-input select {
+    flex: 1;
+}
+
+.water-input button {
+    flex: 1;
+}
+
+#water-summary {
+    text-align: center;
+}
+
+#water-summary p {
+    margin-bottom: 0.5rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.input-group input {
+    flex: 2;
+}
+
+.input-group select {
+    flex: 1;
 }
 
 /* Responsive Adjustments */

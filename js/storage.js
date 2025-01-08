@@ -7,7 +7,9 @@ class StorageManager {
             SETTINGS: 'fitness_settings',
             GOALS: 'fitness_goals',
             TROPHIES: 'fitness_trophies',
-            MEALS: 'fitness_meals'
+            MEALS: 'fitness_meals',
+            WATER_INTAKE: 'fitness_water_intake',
+            WATER_SETTINGS: 'fitness_water_settings'
         };
         
         // Initialize storage with empty data if not exists
@@ -36,6 +38,18 @@ class StorageManager {
         }
         if (!localStorage.getItem(this.KEYS.MEALS)) {
             this.saveMeals({});
+        }
+        if (!localStorage.getItem(this.KEYS.WATER_INTAKE)) {
+            this.saveWaterIntake(0);
+        }
+        if (!localStorage.getItem(this.KEYS.WATER_SETTINGS)) {
+            this.saveWaterSettings({
+                weight: 0,
+                weightUnit: 'kg',
+                age: 0,
+                activityLevel: 'low',
+                climate: 'normal'
+            });
         }
     }
 
@@ -400,6 +414,8 @@ class StorageManager {
         localStorage.removeItem(this.KEYS.GOALS);
         localStorage.removeItem(this.KEYS.TROPHIES);
         localStorage.removeItem(this.KEYS.MEALS);
+        localStorage.removeItem(this.KEYS.WATER_INTAKE);
+        localStorage.removeItem(this.KEYS.WATER_SETTINGS);
         // Reinitialize with empty data
         this.constructor();
     }
@@ -508,6 +524,90 @@ class StorageManager {
         
         this.saveMeals(meals);
         return true;
+    }
+
+    // Water Tracking Methods
+    getWaterIntake() {
+        return parseFloat(localStorage.getItem(this.KEYS.WATER_INTAKE)) || 0;
+    }
+
+    saveWaterIntake(amount) {
+        localStorage.setItem(this.KEYS.WATER_INTAKE, amount.toString());
+    }
+
+    getWaterSettings() {
+        const settings = localStorage.getItem(this.KEYS.WATER_SETTINGS);
+        return settings ? JSON.parse(settings) : {
+            weight: 0,
+            weightUnit: 'kg',
+            age: 0,
+            activityLevel: 'low',
+            climate: 'normal',
+            recommendedGoal: 2000
+        };
+    }
+
+    saveWaterSettings(settings) {
+        localStorage.setItem(this.KEYS.WATER_SETTINGS, JSON.stringify(settings));
+    }
+
+    addWaterIntake(amount, unit) {
+        const amountInMl = unit === 'oz' ? amount * 29.5735 : amount;
+        const currentIntake = this.getWaterIntake();
+        const newIntake = currentIntake + amountInMl;
+        this.saveWaterIntake(newIntake);
+        return newIntake;
+    }
+
+    resetDailyWaterIntake() {
+        this.saveWaterIntake(0);
+    }
+
+    updateWaterSettings(settings) {
+        const currentSettings = this.getWaterSettings();
+        const updatedSettings = { ...currentSettings, ...settings };
+        
+        // Calculate and save recommended goal
+        const recommendedGoal = this.calculateRecommendedWaterIntake(
+            updatedSettings.weight,
+            updatedSettings.weightUnit,
+            updatedSettings.age,
+            updatedSettings.activityLevel,
+            updatedSettings.climate
+        );
+        updatedSettings.recommendedGoal = recommendedGoal;
+        
+        // Save the updated settings
+        this.saveWaterSettings(updatedSettings);
+        
+        return updatedSettings;
+    }
+
+    calculateRecommendedWaterIntake(weight, weightUnit, age, activityLevel, climate) {
+        // Convert weight to kg if needed
+        const weightInKg = weightUnit === 'lbs' ? weight / 2.20462 : weight;
+    
+        // Base water intake: 35 ml per kg of body weight
+        let recommendedIntake = weightInKg * 35;
+    
+        // Add activity level factor
+        if (activityLevel === 'moderate') {
+            recommendedIntake += 500;
+        } else if (activityLevel === 'high') {
+            recommendedIntake += 1000;
+        }
+    
+        // Add climate factor
+        if (climate === 'hot') {
+            recommendedIntake += 500;
+        }
+    
+        // Age adjustment (slight reduction for older adults)
+        if (age > 65) {
+            recommendedIntake *= 0.9;
+        }
+    
+        return Math.round(recommendedIntake);
     }
 }
 

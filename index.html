@@ -48,6 +48,24 @@
                             <p>Meals Today: <span id="total-meals">0</span></p>
                         </div>
                     </div>
+                    <div class="card">
+                        <h3>Water Intake</h3>
+                        <div id="water-summary">
+                            <p>Daily Goal: <span id="water-goal">0</span> ml</p>
+                            <p>Total Intake: <span id="water-intake">0</span> ml</p>
+                            <div class="progress-bar">
+                                <div id="water-progress" class="progress" style="width: 0%"></div>
+                            </div>
+                            <div class="water-input">
+                                <input type="number" id="water-amount" min="0" step="50" placeholder="Amount">
+                                <select id="water-unit">
+                                    <option value="ml">ml</option>
+                                    <option value="oz">oz</option>
+                                </select>
+                                <button onclick="logWaterIntake()">Add</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -217,6 +235,39 @@
                         </label>
                     </div>
                     <div class="setting-group">
+                        <h3>Water Intake Settings</h3>
+                        <div class="form-group">
+                            <label for="user-weight">Weight:</label>
+                            <div class="input-group">
+                                <input type="number" id="user-weight" min="0" step="0.1" required>
+                                <select id="user-weight-unit">
+                                    <option value="kg">kg</option>
+                                    <option value="lbs">lbs</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-age">Age:</label>
+                            <input type="number" id="user-age" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="activity-level">Activity Level:</label>
+                            <select id="activity-level">
+                                <option value="low">Low</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="climate">Climate:</label>
+                            <select id="climate">
+                                <option value="normal">Normal</option>
+                                <option value="hot">Hot/Dry</option>
+                            </select>
+                        </div>
+                        <button onclick="updateWaterGoal()" class="secondary-btn">Update Water Goal</button>
+                    </div>
+                    <div class="setting-group">
                         <h3>Data Management</h3>
                         <button id="export-data" class="secondary-btn">Export Data</button>
                         <button id="import-data" class="secondary-btn">Import Data</button>
@@ -235,6 +286,7 @@
     <script src="js/weightlifting.js"></script>
     <script src="js/cardio.js"></script>
     <script src="js/meals.js"></script>
+    <script src="js/water.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

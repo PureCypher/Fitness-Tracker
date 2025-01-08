@@ -90,7 +90,7 @@ class UIManager {
         });
 
         // Refresh weightlifting log to update all weight displays
-        if (window.weightlifting) {
+        if (window.weightlifting && typeof weightlifting.refreshLog === 'function') {
             weightlifting.refreshLog();
         }
     }
