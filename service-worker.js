@@ -1,14 +1,14 @@
 const CACHE_NAME = 'fitness-tracker-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/styles/main.css',
-    '/js/storage.js',
-    '/js/ui.js',
-    '/js/calendar.js',
-    '/js/weightlifting.js',
-    '/js/cardio.js',
-    '/js/app.js'
+    '/Fitness-Tracker/',
+    '/Fitness-Tracker/index.html',
+    '/Fitness-Tracker/styles/main.css',
+    '/Fitness-Tracker/js/storage.js',
+    '/Fitness-Tracker/js/ui.js',
+    '/Fitness-Tracker/js/calendar.js',
+    '/Fitness-Tracker/js/weightlifting.js',
+    '/Fitness-Tracker/js/cardio.js',
+    '/Fitness-Tracker/js/app.js'
 ];
 
 self.addEventListener('install', event => {
