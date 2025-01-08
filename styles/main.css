@@ -23,7 +23,7 @@
 }
 
 * {
-    margin: 3px;
+    margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
@@ -440,7 +440,7 @@ button:hover {
 /* Performance Comparison Styles */
 .set-summary {
     background: var(--background-color);
-    padding: 0.75rem;
+    padding: 0.25rem;
     border-radius: 4px;
     margin-bottom: 0.5rem;
     display: grid;
@@ -470,6 +470,15 @@ button:hover {
     border-top: 1px solid var(--border-color);
     margin-top: 0.5rem;
     padding-top: 0.5rem;
+}
+
+.log-entry-summary span {
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.log-entry-summary span:last-child {
+    margin-right: 0;
 }
 
 .total-stats {
@@ -823,6 +832,15 @@ button:hover {
     border-color: var(--primary-color);
     outline: none;
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Weightlifting Summary Styles */
+#weightlifting-summary p {
+    margin-bottom: 1rem;
+}
+
+#weightlifting-summary p:last-child {
+    margin-bottom: 0;
 }
 
 /* Water Tracking Styles */
