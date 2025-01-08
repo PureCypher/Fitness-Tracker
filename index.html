@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Fitness Tracker</h1>
+            <nav>
+                <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+                <button class="nav-btn" data-view="weightlifting">Weightlifting</button>
+                <button class="nav-btn" data-view="cardio">Cardio</button>
+                <button class="nav-btn" data-view="meals">Meals</button>
+                <button class="nav-btn" data-view="goals">Goals</button>
+                <button class="nav-btn" data-view="settings">Settings</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Dashboard View -->
+            <section id="dashboard" class="view active">
+                <h2>Today's Summary</h2>
+                <div class="summary-cards">
+                    <div class="card">
+                        <h3>Weightlifting</h3>
+                        <div id="weightlifting-summary">
+                            <p>Total Sets: <span id="total-sets">0</span></p>
+                            <p>Planned Reps: <span id="planned-reps">0</span></p>
+                            <p>Actual Reps: <span id="actual-reps">0</span></p>
+                            <p>Total Weight: <span id="total-weight">0</span> lbs</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Cardio</h3>
+                        <div id="cardio-summary">
+                            <p>Total Duration: <span id="total-duration">0</span> min</p>
+                            <p>Sessions: <span id="total-sessions">0</span></p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Meals</h3>
+                        <div id="meals-summary">
+                            <p>Total Calories: <span id="total-daily-calories">0</span> kcal</p>
+                            <p>Meals Today: <span id="total-meals">0</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Meals View -->
+            <section id="meals" class="view">
+                <!-- Meal tracker content will be dynamically added by meals.js -->
+            </section>
+
+            <!-- Weightlifting View -->
+            <section id="weightlifting" class="view">
+                <h2>Weightlifting Tracker</h2>
+                <form id="weightlifting-form" class="input-form">
+                    <div class="form-group">
+                        <label for="exercise-category">Category:</label>
+                        <select id="exercise-category" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-subcategory">Type:</label>
+                        <select id="exercise-subcategory" required>
+                            <option value="">Select Type</option>
+                        </select>
+                    </div>
+                    <div class="form-group exercise-select-group">
+                        <label for="exercise">Exercise:</label>
+                        <select id="exercise" required>
+                            <option value="">Select Exercise</option>
+                        </select>
+                        <div id="exercise-tooltip" class="tooltip"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="num-sets">Number of Sets:</label>
+                            <input type="number" id="num-sets" min="1" value="3" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="default-weight">Default Weight (<span class="weight-unit">lbs</span>):</label>
+                            <input type="number" id="default-weight" min="0" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="default-reps">Default Planned Reps:</label>
+                            <input type="number" id="default-reps" min="1" required>
+                        </div>
+                    </div>
+                    <button type="button" id="apply-defaults" class="secondary-btn">Apply to All Sets</button>
+                    
+                    <div id="sets-container">
+                        <!-- Sets will be dynamically added here -->
+                    </div>
+
+                    <div class="form-group">
+                        <label for="datetime">Date/Time:</label>
+                        <input type="datetime-local" id="datetime" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes:</label>
+                        <textarea id="notes" rows="2" placeholder="How did this workout feel?"></textarea>
+                    </div>
+
+                    <button type="submit">Log Exercise</button>
+                </form>
+                <div id="weightlifting-log" class="log-container"></div>
+            </section>
+
+            <!-- Cardio View -->
+            <section id="cardio" class="view">
+                <h2>Cardio Tracker</h2>
+                <form id="cardio-form" class="input-form">
+                    <div class="form-group">
+                        <label for="cardio-type">Type:</label>
+                        <select id="cardio-type" required>
+                            <option value="running">Running</option>
+                            <option value="cycling">Cycling</option>
+                            <option value="rowing">Rowing</option>
+                            <option value="swimming">Swimming</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="duration">Duration (min):</label>
+                            <input type="number" id="duration" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="heart-rate">Heart Rate (bpm):</label>
+                            <input type="number" id="heart-rate" min="0" placeholder="Optional">
+                        </div>
+                    </div>
+                    <button type="submit">Log Cardio</button>
+                </form>
+                <div id="cardio-log" class="log-container"></div>
+            </section>
+
+            <!-- Goals View -->
+            <section id="goals" class="view">
+                <h2>Fitness Goals</h2>
+                <div class="goals-container">
+                    <!-- Set New Goal -->
+                    <div class="card">
+                        <h3>Set New Goal</h3>
+                        <form id="new-goal-form" class="input-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="goal-type">Type:</label>
+                                    <select name="goal-type" required>
+                                        <option value="weightlifting">Weightlifting</option>
+                                        <option value="cardio">Cardio</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="goal-duration">Duration:</label>
+                                    <select name="goal-duration" required>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="goal-target">Target:</label>
+                                <div class="input-with-unit">
+                                    <input type="number" name="goal-target" min="1" required>
+                                    <span id="goal-unit-label">lbs</span>
+                                </div>
+                            </div>
+                            <button type="submit">Set Goal</button>
+                        </form>
+                    </div>
+
+                    <!-- Active Goals -->
+                    <div class="card">
+                        <h3>Active Goals</h3>
+                        <div id="active-goals">
+                            <!-- Goals will be dynamically added here -->
+                        </div>
+                    </div>
+
+                    <!-- Trophy Case -->
+                    <div class="card">
+                        <h3>Trophy Case</h3>
+                        <div id="trophy-case">
+                            <!-- Trophies will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="settings" class="view">
+                <h2>Settings</h2>
+                <div class="settings-container">
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <span>Dark Mode</span>
+                            <input type="checkbox" id="dark-mode-toggle">
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <span>Weight Unit</span>
+                            <select id="weight-unit">
+                                <option value="lbs">lbs</option>
+                                <option value="kg">kg</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <h3>Data Management</h3>
+                        <button id="export-data" class="secondary-btn">Export Data</button>
+                        <button id="import-data" class="secondary-btn">Import Data</button>
+                        <input type="file" id="import-input" accept=".json" style="display: none;">
+                        <button id="clear-data" class="danger-btn">Clear All Data</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/workouts.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/weightlifting.js"></script>
+    <script src="js/cardio.js"></script>
+    <script src="js/meals.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
