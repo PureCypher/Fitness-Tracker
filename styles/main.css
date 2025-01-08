@@ -93,6 +93,47 @@ h2 {
     color: var(--text-color);
 }
 
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--surface-color);
+    border-radius: 8px;
+}
+
+.chart-controls label {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.chart-controls select {
+    width: auto;
+    min-width: 150px;
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-card {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 300px;
+}
+
+.chart-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -862,6 +903,25 @@ button:hover {
 @media (max-width: 600px) {
     .app-container {
         padding: 0.5rem;
+    }
+
+    .chart-controls {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem;
+    }
+
+    .chart-controls select {
+        width: 100%;
+    }
+
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-card {
+        min-height: 250px;
+        padding: 1rem;
     }
     
     .form-row {

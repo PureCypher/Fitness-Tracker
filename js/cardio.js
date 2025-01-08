@@ -130,6 +130,7 @@ class CardioManager {
 
         this.refreshLog();
         ui.updateDashboard();
+        document.dispatchEvent(new Event('cardioUpdated'));
         ui.showNotification('Cardio session logged successfully!');
     }
 
@@ -306,6 +307,7 @@ class CardioManager {
             storage.deleteCardioEntry(id);
             this.refreshLog();
             ui.updateDashboard();
+            document.dispatchEvent(new Event('cardioUpdated'));
             ui.showNotification('Cardio session deleted');
         }
     }

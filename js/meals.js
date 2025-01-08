@@ -93,7 +93,7 @@ class MealTracker {
             const mealData = this.getMealFormData();
             storage.addMeal(mealData);
             this.loadTodaysMeals();
-            document.dispatchEvent(new Event('mealLogged'));
+            document.dispatchEvent(new Event('mealsUpdated'));
             ui.updateDashboard();
             this.resetForm();
         } catch (error) {
@@ -108,7 +108,7 @@ class MealTracker {
             
             if (storage.updateMeal(today, this.editingMealId, mealData)) {
                 this.loadTodaysMeals();
-                document.dispatchEvent(new Event('mealLogged'));
+                document.dispatchEvent(new Event('mealsUpdated'));
                 this.resetForm();
             }
         } catch (error) {
@@ -271,7 +271,7 @@ class MealTracker {
         const today = new Date().toISOString().split('T')[0];
         if (storage.deleteMeal(today, parseInt(mealId))) {
             this.loadTodaysMeals();
-            document.dispatchEvent(new Event('mealLogged'));
+            document.dispatchEvent(new Event('mealsUpdated'));
         }
     }
 }

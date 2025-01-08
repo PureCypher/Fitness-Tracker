@@ -326,6 +326,7 @@ class WeightliftingManager {
         this.updateSetsInputs();
         this.refreshLog();
         ui.updateDashboard();
+        document.dispatchEvent(new Event('weightliftingUpdated'));
         ui.showNotification('Weightlifting exercise logged successfully!');
     }
 
@@ -448,6 +449,7 @@ class WeightliftingManager {
             storage.deleteWeightliftingEntry(id);
             this.refreshLog();
             ui.updateDashboard();
+            document.dispatchEvent(new Event('weightliftingUpdated'));
             ui.showNotification('Exercise entry deleted');
         }
     }

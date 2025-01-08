@@ -1,6 +1,6 @@
 class UIManager {
     constructor() {
-        this.views = ['dashboard', 'weightlifting', 'cardio', 'meals', 'goals', 'settings'];
+        this.views = ['dashboard', 'weightlifting', 'cardio', 'meals', 'goals', 'charts', 'settings'];
         this.currentView = 'dashboard';
         this.setupEventListeners();
         this.loadSettings();

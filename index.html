@@ -6,6 +6,7 @@
     <title>Fitness Tracker</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="styles/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -17,6 +18,7 @@
                 <button class="nav-btn" data-view="cardio">Cardio</button>
                 <button class="nav-btn" data-view="meals">Meals</button>
                 <button class="nav-btn" data-view="goals">Goals</button>
+                <button class="nav-btn" data-view="charts">Charts</button>
                 <button class="nav-btn" data-view="settings">Settings</button>
             </nav>
         </header>
@@ -216,6 +218,45 @@
                 </div>
             </section>
 
+            <!-- Charts View -->
+            <section id="charts" class="view">
+                <h2>Progress Charts</h2>
+                <div class="chart-controls">
+                    <label for="time-range">Time Range:</label>
+                    <select id="time-range" onchange="chartManager.setTimeRange(this.value)">
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d">Last 30 Days</option>
+                        <option value="90d">Last 90 Days</option>
+                    </select>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Strength Progress</h3>
+                        <canvas id="strengthChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Cardio Progress</h3>
+                        <canvas id="cardioChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Caloric Balance</h3>
+                        <canvas id="caloriesChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Water Intake History</h3>
+                        <canvas id="waterChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Goal Completion</h3>
+                        <canvas id="goalsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Workout Distribution</h3>
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
             <!-- Settings View -->
             <section id="settings" class="view">
                 <h2>Settings</h2>
@@ -288,6 +329,7 @@
     <script src="js/cardio.js"></script>
     <script src="js/meals.js"></script>
     <script src="js/water.js"></script>
+    <script src="js/charts.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

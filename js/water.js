@@ -25,6 +25,7 @@ function updateWaterGoal() {
 
     // Calculate and update display
     updateWaterDisplay();
+    document.dispatchEvent(new Event('waterUpdated'));
 }
 
 // Log water intake
@@ -46,6 +47,7 @@ function logWaterIntake() {
     // Update displays
     updateWaterDisplay();
     calendar.refresh(); // Refresh calendar to show updated water intake
+    document.dispatchEvent(new Event('waterUpdated'));
 }
 
 // Update water tracking display
