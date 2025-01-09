@@ -286,10 +286,11 @@ class UIManager {
                 return;
             }
 
+            const settings = storage.getSettings();
             const goal = {
                 type: type,
                 target: target,
-                unit: type === 'weightlifting' ? 'lbs' : 'minutes'
+                unit: type === 'weightlifting' ? settings.units : 'minutes'
             };
 
             storage.addGoal(duration, goal);
@@ -305,7 +306,8 @@ class UIManager {
         
         typeSelect.addEventListener('change', () => {
             const type = typeSelect.value;
-            unitLabel.textContent = type === 'weightlifting' ? 'lbs' : 'minutes';
+            const settings = storage.getSettings();
+            unitLabel.textContent = type === 'weightlifting' ? settings.units : 'minutes';
         });
     }
 

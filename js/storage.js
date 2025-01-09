@@ -189,6 +189,37 @@ class StorageManager {
         localStorage.setItem(this.KEYS.GOALS, JSON.stringify(goals));
     }
 
+    addGoal(duration, goal) {
+        const goals = this.getGoals();
+        if (!goals[duration]) {
+            throw new Error(`Invalid duration: ${duration}`);
+        }
+        
+        // Initialize the goal with required properties
+        goal.id = Date.now();
+        goal.progress = 0;
+        goal.completed = false;
+        
+        goals[duration].push(goal);
+        this.saveGoals(goals);
+        return goal;
+    }
+
+    deleteGoal(duration, goalId) {
+        const goals = this.getGoals();
+        if (!goals[duration]) {
+            throw new Error(`Invalid duration: ${duration}`);
+        }
+        
+        const index = goals[duration].findIndex(g => g.id === goalId);
+        if (index !== -1) {
+            goals[duration].splice(index, 1);
+            this.saveGoals(goals);
+            return true;
+        }
+        return false;
+    }
+
     updateAllGoalsProgress() {
         const goals = this.getGoals();
         const now = new Date();
@@ -215,7 +246,9 @@ class StorageManager {
                 // Calculate progress based on goal type
                 if (goal.type === 'weightlifting') {
                     const stats = this.getWeightliftingStats(startDate, now);
-                    goal.progress = stats.totalWeight;
+                    const settings = this.getSettings();
+                    // Convert totalWeight to kg if needed
+                    goal.progress = settings.units === 'kg' ? stats.totalWeight / 2.20462 : stats.totalWeight;
                 } else if (goal.type === 'cardio') {
                     const cardioData = this.getCardio().filter(entry => {
                         const entryDate = new Date(entry.date);
