@@ -7,6 +7,39 @@ class ChartManager {
     }
 
     initializeCharts() {
+        // Weight Progress Chart
+        this.charts.weight = new Chart(document.getElementById('weightChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Body Weight',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Body Weight Progress'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: `Weight (${storage.getSettings().units})`
+                        }
+                    }
+                }
+            }
+        });
+
         // Strength Progress Chart
         this.charts.strength = new Chart(document.getElementById('strengthChart'), {
             type: 'line',
@@ -197,6 +230,7 @@ class ChartManager {
     }
 
     updateAllCharts() {
+        this.updateWeightChart();
         this.updateStrengthChart();
         this.updateCardioChart();
         this.updateCaloriesChart();
@@ -416,6 +450,22 @@ class ChartManager {
         this.charts.goals.update();
     }
 
+    updateWeightChart() {
+        const { start, end } = this.getDateRange();
+        const weightData = storage.getWeightHistory(this.timeRangeFilter);
+        
+        // Sort data by date
+        weightData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        const labels = weightData.map(entry => entry.date);
+        const weights = weightData.map(entry => entry.weight);
+
+        this.charts.weight.data.labels = labels;
+        this.charts.weight.data.datasets[0].data = weights;
+        this.charts.weight.options.scales.y.title.text = `Weight (${storage.getSettings().units})`;
+        this.charts.weight.update();
+    }
+
     updateDistributionChart() {
         const { start, end } = this.getDateRange();
         const weightliftingData = window.storage.getWeightlifting().filter(entry => {
@@ -475,10 +525,17 @@ document.addEventListener('DOMContentLoaded', () => {
         window.chartManager.updateGoalsChart();
     });
 
-    // Update strength chart when weight unit changes
+    // Update charts when weight unit changes
     document.addEventListener('weightUnitChanged', () => {
         const unit = storage.getSettings().units;
         window.chartManager.charts.strength.options.scales.y.title.text = `Weight (${unit})`;
+        window.chartManager.charts.weight.options.scales.y.title.text = `Weight (${unit})`;
         window.chartManager.updateStrengthChart();
+        window.chartManager.updateWeightChart();
+    });
+
+    // Update weight chart when weight is logged
+    document.addEventListener('weightUpdated', () => {
+        window.chartManager.updateWeightChart();
     });
 });

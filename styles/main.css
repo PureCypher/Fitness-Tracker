@@ -850,6 +850,39 @@ button:hover {
     margin-top: 1rem;
 }
 
+/* Weight Tracking Styles */
+.weight-input {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.weight-input input {
+    flex: 2;
+}
+
+.weight-input select {
+    flex: 1;
+}
+
+.weight-input button {
+    flex: 1;
+}
+
+#weight-summary {
+    text-align: center;
+}
+
+#weight-summary p {
+    margin-bottom: 0.5rem;
+}
+
+#latest-weight {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
 .water-input input {
     flex: 2;
 }

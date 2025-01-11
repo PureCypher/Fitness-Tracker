@@ -69,6 +69,20 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <h3>Body Weight</h3>
+                        <div id="weight-summary">
+                            <p>Current Weight: <span id="latest-weight">--</span></p>
+                            <form id="weight-form" class="weight-input">
+                                <input type="number" id="weight-input" min="0" step="0.1" placeholder="Enter weight">
+                                <select id="weight-unit-input">
+                                    <option value="lbs">lbs</option>
+                                    <option value="kg">kg</option>
+                                </select>
+                                <button type="submit">Log Weight</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -251,6 +265,10 @@
                         <canvas id="goalsChart"></canvas>
                     </div>
                     <div class="chart-card">
+                        <h3>Body Weight Progress</h3>
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                    <div class="chart-card">
                         <h3>Workout Distribution</h3>
                         <canvas id="distributionChart"></canvas>
                     </div>
@@ -330,6 +348,7 @@
     <script src="js/meals.js"></script>
     <script src="js/water.js"></script>
     <script src="js/charts.js"></script>
+    <script src="js/weight.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

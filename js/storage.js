@@ -11,7 +11,8 @@ class StorageManager {
             MEALS: 'fitness_meals',
             WATER_INTAKE: 'fitness_water_intake',
             WATER_SETTINGS: 'fitness_water_settings',
-            WATER_HISTORY: 'fitness_water_history'
+            WATER_HISTORY: 'fitness_water_history',
+            WEIGHT_LOGS: 'fitness_weight_logs'
         };
         
         // Initialize storage with empty data if not exists
@@ -55,6 +56,9 @@ class StorageManager {
         }
         if (!localStorage.getItem(this.KEYS.WATER_HISTORY)) {
             this.saveWaterHistory({});
+        }
+        if (!localStorage.getItem(this.KEYS.WEIGHT_LOGS)) {
+            this.saveWeightLogs([]);
         }
     }
 
@@ -469,6 +473,60 @@ class StorageManager {
         return Math.round(recommendedIntake);
     }
 
+    // Weight Tracking Methods
+    getWeightLogs() {
+        return JSON.parse(localStorage.getItem(this.KEYS.WEIGHT_LOGS)) || [];
+    }
+
+    saveWeightLogs(logs) {
+        localStorage.setItem(this.KEYS.WEIGHT_LOGS, JSON.stringify(logs));
+    }
+
+    addWeightLog(weight, unit) {
+        const logs = this.getWeightLogs();
+        const date = new Date().toISOString().split('T')[0];
+        
+        // Check if there's already an entry for today
+        const todayEntryIndex = logs.findIndex(log => log.date === date);
+        const entry = { date, weight, unit };
+        
+        if (todayEntryIndex !== -1) {
+            logs[todayEntryIndex] = entry;
+        } else {
+            logs.push(entry);
+        }
+        
+        this.saveWeightLogs(logs);
+        return entry;
+    }
+
+    getLatestWeight() {
+        const logs = this.getWeightLogs();
+        return logs.length > 0 ? logs[logs.length - 1] : null;
+    }
+
+    getWeightHistory(timeRange = '30d') {
+        const logs = this.getWeightLogs();
+        const settings = this.getSettings();
+        const targetUnit = settings.units;
+        
+        // Convert all weights to the target unit
+        const convertedLogs = logs.map(log => ({
+            date: log.date,
+            weight: log.unit !== targetUnit ? 
+                (log.unit === 'lbs' ? log.weight / 2.20462 : log.weight * 2.20462) : 
+                log.weight
+        }));
+
+        // Filter based on time range
+        const now = new Date();
+        const daysToShow = parseInt(timeRange);
+        const startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - daysToShow);
+
+        return convertedLogs.filter(log => new Date(log.date) >= startDate);
+    }
+
     clearAllData() {
         localStorage.removeItem(this.KEYS.WEIGHTLIFTING);
         localStorage.removeItem(this.KEYS.CARDIO);
@@ -479,6 +537,7 @@ class StorageManager {
         localStorage.removeItem(this.KEYS.WATER_INTAKE);
         localStorage.removeItem(this.KEYS.WATER_SETTINGS);
         localStorage.removeItem(this.KEYS.WATER_HISTORY);
+        localStorage.removeItem(this.KEYS.WEIGHT_LOGS);
         // Reinitialize with empty data
         this.constructor();
     }
