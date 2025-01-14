@@ -579,7 +579,7 @@ class StorageManager {
         localStorage.removeItem(this.KEYS.WATER_HISTORY);
         localStorage.removeItem(this.KEYS.WEIGHT_LOGS);
         // Reinitialize with empty data
-        this.constructor();
+        window.storage = new StorageManager();
     }
 }
 
