@@ -245,7 +245,6 @@ class CalendarView {
     createWeightliftingEntry(entry) {
         const totalPlannedReps = entry.sets.reduce((sum, set) => sum + set.plannedReps, 0);
         const totalActualReps = entry.sets.reduce((sum, set) => sum + set.actualReps, 0);
-        const totalWeight = entry.sets.reduce((sum, set) => sum + (set.actualReps * set.weight), 0);
         const completion = ((totalActualReps / totalPlannedReps) * 100).toFixed(1);
 
         const container = InputValidator.createSafeElement('div', { 
@@ -264,6 +263,23 @@ class CalendarView {
         const deleteBtn = InputValidator.createSafeElement('button', { class: 'delete-btn' }, '×');
         header.appendChild(deleteBtn);
         container.appendChild(header);
+        
+        const storedUnit = entry.sets.length > 0 ? entry.sets[0].unit : 'kg';
+        const settings = storage.getSettings();
+        
+        // Calculate total weight in the display unit
+        const totalWeight = entry.sets.reduce((sum, set) => {
+            // First convert the weight to the display unit
+            const weightInDisplayUnit = settings.units === set.unit ? 
+                set.weight : 
+                (settings.units === 'kg' ? WeightConverter.lbsToKg(set.weight) : WeightConverter.kgToLbs(set.weight));
+            // Then multiply by reps to get total weight lifted
+            return sum + (weightInDisplayUnit * set.actualReps);
+        }, 0);
+
+        // Format and display weight with unit
+        const weightDisplay = WeightConverter.formatWeight(totalWeight, settings.units, storedUnit);
+        const [value, unit] = weightDisplay.split(' ');
 
         // Sets
         const setsContainer = InputValidator.createSafeElement('div', { class: 'workout-entry-sets' });
@@ -277,7 +293,7 @@ class CalendarView {
             ));
             setDiv.appendChild(InputValidator.createSafeElement('span', 
                 { class: 'planned' }, 
-                `Planned: ${set.plannedReps} reps @ ${set.weight} lbs`
+                `Planned: ${set.plannedReps} reps @ ${set.weight} ${unit}`
             ));
             setDiv.appendChild(InputValidator.createSafeElement('span', 
                 { class: 'actual' }, 
@@ -299,7 +315,7 @@ class CalendarView {
             `Total Completed: ${totalActualReps} reps (${completion}%)`
         ));
         stats.appendChild(InputValidator.createSafeElement('span', {}, 
-            `Total Weight: ${totalWeight} lbs`
+            `Total Weight: ${value} ${unit}`
         ));
         
         summary.appendChild(stats);

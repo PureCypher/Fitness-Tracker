@@ -7,6 +7,14 @@ class UIManager {
     }
 
     setupEventListeners() {
+        // Workout type selector
+        document.querySelectorAll('.workout-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.type;
+                this.switchWorkoutType(type);
+            });
+        });
+
         // Navigation
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -45,6 +53,43 @@ class UIManager {
         document.getElementById('clear-data').addEventListener('click', this.handleClearData.bind(this));
     }
 
+    switchWorkoutType(type) {
+        // Update button states
+        document.querySelectorAll('.workout-type-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.type === type);
+        });
+
+        // Show/hide appropriate form
+        const singleForm = document.getElementById('weightlifting-form');
+        const circuitForm = document.getElementById('circuit-form');
+
+        if (type === 'single') {
+            singleForm.classList.remove('hidden');
+            singleForm.classList.add('active');
+            circuitForm.classList.add('hidden');
+            circuitForm.classList.remove('active');
+        } else {
+            singleForm.classList.add('hidden');
+            singleForm.classList.remove('active');
+            circuitForm.classList.remove('hidden');
+            circuitForm.classList.add('active');
+            
+            // Initialize circuit form
+            if (circuitForm.querySelector('#circuit-exercise-list').children.length === 0) {
+                circuitManager.addExerciseToCircuit();
+            }
+            
+            // Set current date/time
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            circuitForm.querySelector('#circuit-datetime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    }
+
     loadSettings() {
         const settings = storage.getSettings();
         
@@ -60,23 +105,6 @@ class UIManager {
     }
 
     updateWeightUnitDisplays(unit) {
-        // Update all weight unit labels
-        document.querySelectorAll('.weight-unit').forEach(label => {
-            label.textContent = unit;
-        });
-
-        // Update dashboard weight display
-        const totalWeightElement = document.getElementById('total-weight');
-        if (totalWeightElement) {
-            const currentWeight = parseFloat(totalWeightElement.textContent);
-            if (!isNaN(currentWeight)) {
-                totalWeightElement.textContent = unit === 'kg' ? 
-                    WeightConverter.lbsToKg(currentWeight).toFixed(1) : 
-                    currentWeight.toFixed(1);
-            }
-            totalWeightElement.nextSibling.textContent = ` ${unit}`;
-        }
-
         // Update goal unit labels for weightlifting goals
         const goalUnitLabel = document.getElementById('goal-unit-label');
         if (goalUnitLabel && goalUnitLabel.textContent === 'lbs') {
@@ -90,6 +118,9 @@ class UIManager {
                 element.textContent = WeightConverter.formatWeight(weightLbs, unit);
             }
         });
+
+        // Update dashboard display
+        this.updateDashboard();
 
         // Refresh weightlifting log to update all weight displays
         if (window.weightlifting && typeof weightlifting.refreshLog === 'function') {
@@ -166,12 +197,28 @@ class UIManager {
 
     updateDashboard() {
         const summary = storage.getTodaySummary();
+        const settings = storage.getSettings();
         
         // Update weightlifting summary
-        document.getElementById('total-sets').textContent = summary.weightlifting.totalSets;
-        document.getElementById('planned-reps').textContent = summary.weightlifting.plannedReps;
-        document.getElementById('actual-reps').textContent = summary.weightlifting.actualReps;
-        document.getElementById('total-weight').textContent = summary.weightlifting.totalWeight;
+        const weightlifting = summary.weightlifting || { totalSets: 0, plannedReps: 0, actualReps: 0, totalWeight: 0 };
+
+        document.getElementById('total-sets').textContent = weightlifting.totalSets;
+        document.getElementById('planned-reps').textContent = weightlifting.plannedReps;
+        document.getElementById('actual-reps').textContent = weightlifting.actualReps;
+        
+        // Get the first entry's unit (if any) to determine the stored unit
+        const entries = storage.getWeightlifting().filter(entry => {
+            const entryDate = new Date(entry.date).toISOString().split('T')[0];
+            return entryDate === new Date().toISOString().split('T')[0];
+        });
+        const storedUnit = entries.length > 0 && entries[0].sets.length > 0 ? entries[0].sets[0].unit : 'kg';
+        
+        // Format and display weight with unit
+        const weightValue = weightlifting.totalWeight;
+        const convertedWeight = storedUnit !== settings.units ? 
+            (settings.units === 'kg' ? WeightConverter.lbsToKg(weightValue) : WeightConverter.kgToLbs(weightValue)) :
+            weightValue;
+        document.getElementById('total-weight').textContent = `${convertedWeight.toFixed(1)} ${settings.units}`;
         
         // Update cardio summary
         document.getElementById('total-duration').textContent = summary.cardio.totalDuration;

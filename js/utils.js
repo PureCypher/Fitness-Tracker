@@ -27,9 +27,12 @@ const WeightConverter = {
      * @param {string} unit - Unit to display ('lbs' or 'kg')
      * @returns {string} Formatted weight with unit
      */
-    formatWeight(weight, unit) {
-        const value = unit === 'kg' ? this.lbsToKg(weight) : weight;
-        return `${value.toFixed(1)} ${unit}`;
+    formatWeight(weight, displayUnit, storedUnit = 'lbs') {
+        let value = weight;
+        if (storedUnit !== displayUnit) {
+            value = displayUnit === 'kg' ? this.lbsToKg(weight) : this.kgToLbs(weight);
+        }
+        return `${value.toFixed(1)} ${displayUnit}`;
     }
 };
 

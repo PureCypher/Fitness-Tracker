@@ -76,12 +76,17 @@ class StorageManager {
         entry.id = Date.now();
         entry.date = entry.date ? new Date(entry.date).toISOString() : new Date().toISOString();
         entry.notes = entry.notes || '';
-        entry.sets = entry.sets.map((set, index) => ({
-            setNumber: index + 1,
-            plannedReps: set.plannedReps || 0,
-            actualReps: set.actualReps || 0,
-            weight: set.weight || 0
-        }));
+        entry.sets = entry.sets.map((set, index) => {
+            // Ensure we preserve the unit from the input
+            const unit = set.unit || storage.getSettings().units;
+            return {
+                setNumber: index + 1,
+                plannedReps: set.plannedReps || 0,
+                actualReps: set.actualReps || 0,
+                weight: set.weight || 0,
+                unit: unit
+            };
+        });
         data.push(entry);
         this.saveWeightlifting(data);
         return entry;
@@ -100,8 +105,18 @@ class StorageManager {
                 sum + entry.sets.reduce((setSum, set) => setSum + set.plannedReps, 0), 0),
             actualReps: filteredData.reduce((sum, entry) => 
                 sum + entry.sets.reduce((setSum, set) => setSum + set.actualReps, 0), 0),
-            totalWeight: filteredData.reduce((sum, entry) => 
-                sum + entry.sets.reduce((setSum, set) => setSum + (set.actualReps * set.weight), 0), 0),
+            totalWeight: filteredData.reduce((sum, entry) => {
+                const settings = this.getSettings();
+                const setWeight = entry.sets.reduce((setSum, set) => {
+                    // First convert the weight to the display unit
+                    const weightInDisplayUnit = settings.units === set.unit ? 
+                        set.weight : 
+                        (settings.units === 'kg' ? WeightConverter.lbsToKg(set.weight) : WeightConverter.kgToLbs(set.weight));
+                    // Then multiply by reps to get total weight lifted
+                    return setSum + (weightInDisplayUnit * set.actualReps);
+                }, 0);
+                return sum + setWeight;
+            }, 0),
             exerciseCount: filteredData.length,
             exercises: this.groupByExercise(filteredData)
         };
@@ -121,7 +136,15 @@ class StorageManager {
             groups[entry.exercise].totalSets += entry.sets.length;
             groups[entry.exercise].plannedReps += entry.sets.reduce((sum, set) => sum + set.plannedReps, 0);
             groups[entry.exercise].actualReps += entry.sets.reduce((sum, set) => sum + set.actualReps, 0);
-            groups[entry.exercise].totalWeight += entry.sets.reduce((sum, set) => sum + (set.actualReps * set.weight), 0);
+            groups[entry.exercise].totalWeight += entry.sets.reduce((sum, set) => {
+                const settings = this.getSettings();
+                // First convert the weight to the display unit
+                const weightInDisplayUnit = settings.units === set.unit ? 
+                    set.weight : 
+                    (settings.units === 'kg' ? WeightConverter.lbsToKg(set.weight) : WeightConverter.kgToLbs(set.weight));
+                // Then multiply by reps to get total weight lifted
+                return sum + (weightInDisplayUnit * set.actualReps);
+            }, 0);
             groups[entry.exercise].count += 1;
             return groups;
         }, {});
@@ -312,23 +335,40 @@ class StorageManager {
         const today = new Date().toISOString().split('T')[0];
         
         // Get weightlifting summary
-        const weightliftingData = this.getWeightlifting().filter(entry => 
-            entry.date.startsWith(today)
-        );
+        const allData = this.getWeightlifting();
+        console.log('All weightlifting data:', allData);
+        
+        const weightliftingData = allData.filter(entry => {
+            const entryDate = new Date(entry.date).toISOString().split('T')[0];
+            console.log('Comparing dates:', entryDate, today);
+            return entryDate === today;
+        });
+        console.log('Filtered weightlifting data:', weightliftingData);
         const weightlifting = {
             totalSets: weightliftingData.reduce((sum, entry) => sum + entry.sets.length, 0),
             plannedReps: weightliftingData.reduce((sum, entry) => 
                 sum + entry.sets.reduce((setSum, set) => setSum + set.plannedReps, 0), 0),
             actualReps: weightliftingData.reduce((sum, entry) => 
                 sum + entry.sets.reduce((setSum, set) => setSum + set.actualReps, 0), 0),
-            totalWeight: weightliftingData.reduce((sum, entry) => 
-                sum + entry.sets.reduce((setSum, set) => setSum + (set.actualReps * set.weight), 0), 0)
+            totalWeight: weightliftingData.reduce((sum, entry) => {
+                const settings = this.getSettings();
+                const setWeight = entry.sets.reduce((setSum, set) => {
+                    // First convert the weight to the display unit
+                    const weightInDisplayUnit = settings.units === set.unit ? 
+                        set.weight : 
+                        (settings.units === 'kg' ? WeightConverter.lbsToKg(set.weight) : WeightConverter.kgToLbs(set.weight));
+                    // Then multiply by reps to get total weight lifted
+                    return setSum + (weightInDisplayUnit * set.actualReps);
+                }, 0);
+                return sum + setWeight;
+            }, 0)
         };
 
         // Get cardio summary
-        const cardioData = this.getCardio().filter(entry => 
-            entry.date.startsWith(today)
-        );
+        const cardioData = this.getCardio().filter(entry => {
+            const entryDate = new Date(entry.date).toISOString().split('T')[0];
+            return entryDate === today;
+        });
         const cardio = {
             totalDuration: cardioData.reduce((sum, entry) => sum + entry.duration, 0),
             totalSessions: cardioData.length

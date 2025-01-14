@@ -93,6 +93,73 @@ h2 {
     color: var(--text-color);
 }
 
+/* Circuit Workout Styles */
+.workout-type-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.workout-type-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--surface-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.workout-type-btn:hover {
+    border-color: var(--primary-color);
+}
+
+.workout-type-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.input-form.hidden {
+    display: none;
+}
+
+#circuit-exercise-list {
+    margin-bottom: 1rem;
+}
+
+.exercise-entry {
+    background: var(--background-secondary);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.exercise-entry .form-row {
+    align-items: flex-end;
+}
+
+.remove-exercise {
+    background: var(--danger-color);
+    padding: 0.5rem;
+    height: 38px;
+    width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-exercise:hover {
+    background: #bd2130;
+}
+
+#add-circuit-exercise {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+/* Chart Controls */
 .chart-controls {
     display: flex;
     align-items: center;

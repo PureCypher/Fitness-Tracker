@@ -283,10 +283,10 @@ class WeightliftingManager {
                 WeightliftingManager.LIMITS.WEIGHT_MAX
             );
 
-            // Convert kg to lbs for storage if needed
-            if (storage.getSettings().units === 'kg') {
-                weight = WeightConverter.kgToLbs(weight);
-            }
+            // Get the current unit from settings
+            const settings = storage.getSettings();
+            const unit = settings.units;
+            console.log('Current unit:', unit);
             const plannedReps = InputValidator.validateNumber(
                 setGroup.querySelector('.set-planned-reps').value,
                 1,
@@ -302,7 +302,14 @@ class WeightliftingManager {
                 throw new Error('Invalid set data');
             }
 
-            sets.push({ weight, plannedReps, actualReps });
+            const set = { 
+                weight, 
+                unit,
+                plannedReps, 
+                actualReps 
+            };
+            console.log('Adding set:', set);
+            sets.push(set);
         });
 
         const notes = InputValidator.sanitizeText(this.form.notes.value.trim());
@@ -366,82 +373,268 @@ class WeightliftingManager {
             
             const entriesContainer = InputValidator.createSafeElement('div', { class: 'log-entries' });
 
+            // Group circuit exercises (entries with same date and notes)
+            const circuits = new Map();
             dateEntries.forEach(entry => {
-                const totalPlannedReps = entry.sets.reduce((sum, set) => sum + set.plannedReps, 0);
-                const totalActualReps = entry.sets.reduce((sum, set) => sum + set.actualReps, 0);
-                const totalWeight = entry.sets.reduce((sum, set) => sum + (set.actualReps * set.weight), 0);
-
-                const logEntry = InputValidator.createSafeElement('div', { 
-                    class: 'log-entry',
-                    'data-id': entry.id.toString()
-                });
-
-                // Create header
-                const header = InputValidator.createSafeElement('div', { class: 'log-entry-header' });
-                header.appendChild(InputValidator.createSafeElement('h4', {}, entry.exercise));
-                
-                const deleteBtn = InputValidator.createSafeElement('button', { class: 'delete-btn' }, '×');
-                deleteBtn.addEventListener('click', () => this.deleteEntry(entry.id));
-                header.appendChild(deleteBtn);
-                
-                logEntry.appendChild(header);
-
-                // Create sets section
-                const setsContainer = InputValidator.createSafeElement('div', { class: 'log-entry-sets' });
-                
-                entry.sets.forEach((set, index) => {
-                    const completion = ((set.actualReps / set.plannedReps) * 100).toFixed(1);
-                    const setDiv = InputValidator.createSafeElement('div', { class: 'set-summary' });
-                    
-                    setDiv.appendChild(InputValidator.createSafeElement('span', { class: 'set-number' }, 
-                        `Set ${index + 1}:`
-                    ));
-                    setDiv.appendChild(InputValidator.createSafeElement('span', { class: 'planned' }, 
-                        `Planned: ${set.plannedReps} reps @ ${WeightConverter.formatWeight(set.weight, storage.getSettings().units)}`
-                    ));
-                    setDiv.appendChild(InputValidator.createSafeElement('span', { class: 'actual' }, 
-                        `Completed: ${set.actualReps} reps (${completion}%)`
-                    ));
-                    
-                    setsContainer.appendChild(setDiv);
-                });
-                
-                logEntry.appendChild(setsContainer);
-
-                // Create summary section
-                const summary = InputValidator.createSafeElement('div', { class: 'log-entry-summary' });
-                summary.appendChild(InputValidator.createSafeElement('span', {}, 
-                    `Total Planned: ${totalPlannedReps} reps`
-                ));
-                summary.appendChild(InputValidator.createSafeElement('span', {}, 
-                    `Total Completed: ${totalActualReps} reps`
-                ));
-                summary.appendChild(InputValidator.createSafeElement('span', {}, 
-                    `Total Weight: ${WeightConverter.formatWeight(totalWeight, storage.getSettings().units)}`
-                ));
-                
-                logEntry.appendChild(summary);
-
-                // Add notes if present
-                if (entry.notes) {
-                    logEntry.appendChild(InputValidator.createSafeElement('div', 
-                        { class: 'log-entry-notes' }, 
-                        entry.notes
-                    ));
+                const key = `${entry.date}-${entry.notes}`;
+                if (!circuits.has(key)) {
+                    circuits.set(key, []);
                 }
-
-                // Add timestamp
-                logEntry.appendChild(InputValidator.createSafeElement('div', 
-                    { class: 'log-entry-time' }, 
-                    new Date(entry.date).toLocaleTimeString()
-                ));
-
-                entriesContainer.appendChild(logEntry);
+                circuits.get(key).push(entry);
             });
 
+            // Process each group of entries
+            circuits.forEach(circuitEntries => {
+                // If this is a circuit (multiple exercises with same timestamp and notes)
+                if (circuitEntries.length > 1) {
+                    const circuitContainer = InputValidator.createSafeElement('div', { class: 'circuit-entry' });
+                    
+                    // Add circuit header
+                    const circuitHeader = InputValidator.createSafeElement('div', { class: 'circuit-header' });
+                    circuitHeader.appendChild(InputValidator.createSafeElement('h4', {}, '🔄 Circuit Workout'));
+                    circuitContainer.appendChild(circuitHeader);
+
+                    let totalCircuitWeight = 0;
+                    let totalCircuitReps = 0;
+
+                    // Add each exercise in the circuit
+                    circuitEntries.forEach(entry => {
+                        const exerciseDiv = this.createExerciseEntry(entry, true);
+                        circuitContainer.appendChild(exerciseDiv);
+
+                        // Calculate circuit totals
+                        const settings = storage.getSettings();
+                        entry.sets.forEach(set => {
+                            const weightInDisplayUnit = settings.units === set.unit ? 
+                                set.weight : 
+                                (settings.units === 'kg' ? WeightConverter.lbsToKg(set.weight) : WeightConverter.kgToLbs(set.weight));
+                            totalCircuitWeight += weightInDisplayUnit * set.actualReps;
+                            totalCircuitReps += set.actualReps;
+                        });
+                    });
+
+                    // Add circuit summary
+                    const circuitSummary = InputValidator.createSafeElement('div', { class: 'circuit-summary' });
+                    circuitSummary.appendChild(InputValidator.createSafeElement('span', {}, 
+                        `Total Circuit Weight: ${WeightConverter.formatWeight(totalCircuitWeight, storage.getSettings().units)}`
+                    ));
+                    circuitSummary.appendChild(InputValidator.createSafeElement('span', {}, 
+                        `Total Circuit Reps: ${totalCircuitReps}`
+                    ));
+                    if (circuitEntries[0].notes) {
+                        circuitSummary.appendChild(InputValidator.createSafeElement('div', 
+                            { class: 'circuit-notes' }, 
+                            circuitEntries[0].notes
+                        ));
+                    }
+                    circuitContainer.appendChild(circuitSummary);
+
+                    // Add timestamp
+                    circuitContainer.appendChild(InputValidator.createSafeElement('div', 
+                        { class: 'log-entry-time' }, 
+                        new Date(circuitEntries[0].date).toLocaleTimeString()
+                    ));
+
+                    entriesContainer.appendChild(circuitContainer);
+                } else {
+                    // Single exercise entry
+                    const entry = circuitEntries[0];
+                    const exerciseDiv = this.createExerciseEntry(entry, false);
+                    entriesContainer.appendChild(exerciseDiv);
+                }
+            });
             dateGroup.appendChild(entriesContainer);
             this.logContainer.appendChild(dateGroup);
         });
+
+        this.ensureCircuitStyles();
+    }
+
+    createExerciseEntry(entry, isCircuitExercise) {
+        const totalPlannedReps = entry.sets.reduce((sum, set) => sum + set.plannedReps, 0);
+        const totalActualReps = entry.sets.reduce((sum, set) => sum + set.actualReps, 0);
+        const settings = storage.getSettings();
+        const totalWeight = entry.sets.reduce((sum, set) => {
+            const weightInDisplayUnit = settings.units === set.unit ? 
+                set.weight : 
+                (settings.units === 'kg' ? WeightConverter.lbsToKg(set.weight) : WeightConverter.kgToLbs(set.weight));
+            return sum + (weightInDisplayUnit * set.actualReps);
+        }, 0);
+
+        const logEntry = InputValidator.createSafeElement('div', { 
+            class: `log-entry ${isCircuitExercise ? 'circuit-exercise' : ''}`,
+            'data-id': entry.id.toString()
+        });
+
+        // Create header
+        const header = InputValidator.createSafeElement('div', { class: 'log-entry-header' });
+        header.appendChild(InputValidator.createSafeElement('h4', {}, entry.exercise));
+        
+        if (!isCircuitExercise) {
+            const deleteBtn = InputValidator.createSafeElement('button', { class: 'delete-btn' }, '×');
+            deleteBtn.addEventListener('click', () => this.deleteEntry(entry.id));
+            header.appendChild(deleteBtn);
+        }
+        
+        logEntry.appendChild(header);
+
+        // Create sets section
+        const setsContainer = InputValidator.createSafeElement('div', { class: 'log-entry-sets' });
+        
+        entry.sets.forEach((set, index) => {
+            const completion = ((set.actualReps / set.plannedReps) * 100).toFixed(1);
+            const setDiv = InputValidator.createSafeElement('div', { 
+                class: 'set-summary',
+                'data-set-index': index.toString()
+            });
+            
+            setDiv.appendChild(InputValidator.createSafeElement('span', { class: 'set-number' }, 
+                `Set ${index + 1}:`
+            ));
+            setDiv.appendChild(InputValidator.createSafeElement('span', { class: 'planned' }, 
+                `Planned: ${set.plannedReps} reps @ ${WeightConverter.formatWeight(set.weight, settings.units, set.unit || 'lbs')}`
+            ));
+            setDiv.appendChild(InputValidator.createSafeElement('span', { class: 'actual' }, 
+                `Completed: ${set.actualReps} reps (${completion}%)`
+            ));
+
+            // Add edit button
+            const editBtn = InputValidator.createSafeElement('button', { class: 'edit-set-btn' }, 'Edit');
+            editBtn.addEventListener('click', () => {
+                if (!setDiv.querySelector('.edit-set-form')) {
+                    circuitManager.makeSetEditable(setDiv);
+                }
+            });
+            setDiv.appendChild(editBtn);
+            
+            setsContainer.appendChild(setDiv);
+        });
+        
+        logEntry.appendChild(setsContainer);
+
+        // Create summary section
+        const summary = InputValidator.createSafeElement('div', { class: 'log-entry-summary' });
+        summary.appendChild(InputValidator.createSafeElement('span', {}, 
+            `Total Planned: ${totalPlannedReps} reps`
+        ));
+        summary.appendChild(InputValidator.createSafeElement('span', {}, 
+            `Total Completed: ${totalActualReps} reps`
+        ));
+        summary.appendChild(InputValidator.createSafeElement('span', {}, 
+            `Total Weight: ${WeightConverter.formatWeight(totalWeight, settings.units, entry.sets[0].unit)}`
+        ));
+        
+        logEntry.appendChild(summary);
+
+        // Add notes if present and not in a circuit
+        if (entry.notes && !isCircuitExercise) {
+            logEntry.appendChild(InputValidator.createSafeElement('div', 
+                { class: 'log-entry-notes' }, 
+                entry.notes
+            ));
+        }
+
+        // Add timestamp if not in a circuit
+        if (!isCircuitExercise) {
+            logEntry.appendChild(InputValidator.createSafeElement('div', 
+                { class: 'log-entry-time' }, 
+                new Date(entry.date).toLocaleTimeString()
+            ));
+        }
+
+        return logEntry;
+    }
+
+    ensureCircuitStyles() {
+        if (!document.getElementById('circuit-styles')) {
+            const styles = InputValidator.createSafeElement('style', { id: 'circuit-styles' });
+            styles.textContent = `
+                .circuit-entry {
+                    background: var(--background-secondary);
+                    border-radius: 8px;
+                    padding: 1rem;
+                    margin: 1rem 0;
+                    border: 2px solid var(--primary-color);
+                }
+                .circuit-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                    padding-bottom: 0.5rem;
+                    border-bottom: 1px solid var(--border-color);
+                }
+                .circuit-header h4 {
+                    margin: 0;
+                    color: var(--primary-color);
+                }
+                .circuit-exercise {
+                    margin: 0.5rem 0;
+                    padding: 0.5rem;
+                    background: var(--background-primary);
+                    border-radius: 4px;
+                }
+                .circuit-summary {
+                    margin-top: 1rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border-color);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+                .circuit-notes {
+                    font-style: italic;
+                    color: var(--text-secondary);
+                    margin-top: 0.5rem;
+                }
+
+                /* Edit Set Styles */
+                .set-summary {
+                    position: relative;
+                    padding-right: 60px;
+                }
+                .edit-set-btn {
+                    position: absolute;
+                    right: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    padding: 4px 8px;
+                    background: var(--primary-color);
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                }
+                .edit-set-btn:hover {
+                    background: var(--primary-color-dark);
+                }
+                .edit-set-form {
+                    display: flex;
+                    gap: 0.5rem;
+                    align-items: center;
+                    margin-top: 0.5rem;
+                }
+                .edit-set-form input {
+                    width: 80px;
+                    padding: 4px 8px;
+                    border: 1px solid var(--border-color);
+                    border-radius: 4px;
+                }
+                .update-set-btn {
+                    padding: 4px 8px;
+                    background: var(--primary-color);
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                .update-set-btn:hover {
+                    background: var(--primary-color-dark);
+                }
+            `;
+            document.head.appendChild(styles);
+        }
     }
 
     deleteEntry(id) {
