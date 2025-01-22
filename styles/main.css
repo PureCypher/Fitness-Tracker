@@ -1013,66 +1013,223 @@ button:hover {
     flex: 1;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 600px) {
-    .goals-container {
-        grid-template-columns: 1fr;
-    }
-
-    .trophy {
-        flex-direction: column;
-        text-align: center;
-        padding: 0.75rem;
-    }
-
-    .trophy-details {
-        text-align: center;
-    }
+/* Mobile First Responsive Design */
+/* Base styles for mobile (<=480px) */
+.app-container {
+    padding: 0.5rem;
+    width: 100%;
+    max-width: 100%;
 }
 
-@media (max-width: 600px) {
+header {
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.nav-btn {
+    flex: 1 1 calc(33.333% - 0.25rem);
+    min-width: auto;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.summary-cards,
+.goals-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.card {
+    padding: 1rem;
+}
+
+.form-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.input-form {
+    padding: 1rem;
+}
+
+.chart-controls {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem;
+    gap: 0.5rem;
+}
+
+.charts-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.chart-card {
+    min-height: 250px;
+    padding: 1rem;
+}
+
+.calendar-grid {
+    gap: 2px;
+}
+
+.calendar-day {
+    padding: 0.25rem;
+}
+
+.day-number {
+    font-size: 0.8rem;
+}
+
+.workout-indicators {
+    bottom: 2px;
+    right: 2px;
+}
+
+.trophy {
+    flex-direction: column;
+    text-align: center;
+    padding: 0.75rem;
+}
+
+.trophy-details {
+    text-align: center;
+}
+
+.water-input,
+.weight-input {
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-with-unit {
+    flex-direction: column;
+}
+
+/* Tablet (481px - 1024px) */
+@media (min-width: 481px) {
     .app-container {
-        padding: 0.5rem;
-    }
-
-    .chart-controls {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0.75rem;
-    }
-
-    .chart-controls select {
-        width: 100%;
-    }
-
-    .charts-container {
-        grid-template-columns: 1fr;
-    }
-
-    .chart-card {
-        min-height: 250px;
         padding: 1rem;
     }
-    
-    .form-row {
-        grid-template-columns: 1fr;
+
+    h1 {
+        font-size: 1.75rem;
     }
-    
+
     .nav-btn {
-        flex: 1;
+        flex: 1 1 auto;
         min-width: 120px;
     }
 
+    .summary-cards,
+    .goals-container {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .water-input,
+    .weight-input {
+        flex-direction: row;
+    }
+
+    .input-with-unit {
+        flex-direction: row;
+    }
+
+    .trophy {
+        flex-direction: row;
+        text-align: left;
+    }
+
+    .trophy-details {
+        text-align: left;
+    }
+}
+
+/* Desktop (1025px - 1440px) */
+@media (min-width: 1025px) {
+    .app-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .charts-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .chart-controls {
+        flex-direction: row;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .calendar-grid {
+        gap: 4px;
+    }
+
     .calendar-day {
-        padding: 0.25rem;
+        padding: 0.5rem;
     }
 
     .day-number {
-        font-size: 0.8rem;
+        font-size: 1rem;
+    }
+}
+
+/* Large Screens (>1440px) */
+@media (min-width: 1441px) {
+    body {
+        font-size: 18px;
     }
 
-    .workout-indicators {
-        bottom: 2px;
-        right: 2px;
+    .app-container {
+        max-width: 1400px;
+    }
+
+    .charts-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+/* Print Media Query */
+@media print {
+    .app-container {
+        max-width: none;
+        padding: 0;
+    }
+
+    nav,
+    button,
+    .input-form {
+        display: none;
+    }
+
+    .card {
+        break-inside: avoid;
     }
 }
