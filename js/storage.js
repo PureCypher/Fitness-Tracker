@@ -80,11 +80,13 @@ class StorageManager {
             // Ensure we preserve the unit from the input
             const unit = set.unit || storage.getSettings().units;
             return {
+                id: `${entry.id}-${index}`,
                 setNumber: index + 1,
                 plannedReps: set.plannedReps || 0,
                 actualReps: set.actualReps || 0,
                 weight: set.weight || 0,
-                unit: unit
+                unit: unit,
+                exerciseName: entry.exercise
             };
         });
         data.push(entry);

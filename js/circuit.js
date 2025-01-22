@@ -174,9 +174,7 @@ class CircuitManager {
 
     handleSetUpdate(button) {
         const setElement = button.closest('.set-summary');
-        const entryElement = button.closest('.log-entry');
-        const entryId = parseInt(entryElement.dataset.id);
-        const setIndex = parseInt(setElement.dataset.setIndex);
+        const setId = setElement.dataset.setId;
 
         const newReps = InputValidator.validateNumber(
             setElement.querySelector('.edit-reps').value,
@@ -197,13 +195,21 @@ class CircuitManager {
 
         // Update in storage
         const entries = storage.getWeightlifting();
-        const entryIndex = entries.findIndex(entry => entry.id === entryId);
-        
-        if (entryIndex !== -1) {
-            entries[entryIndex].sets[setIndex].actualReps = newReps;
-            entries[entryIndex].sets[setIndex].weight = newWeight;
-            storage.saveWeightlifting(entries);
+        let updated = false;
 
+        // Find and update the specific set using its unique ID
+        entries.forEach(entry => {
+            entry.sets.forEach(set => {
+                if (set.id === setId) {
+                    set.actualReps = newReps;
+                    set.weight = newWeight;
+                    updated = true;
+                }
+            });
+        });
+
+        if (updated) {
+            storage.saveWeightlifting(entries);
             // Update UI
             weightlifting.refreshLog();
             ui.updateDashboard();
@@ -213,17 +219,47 @@ class CircuitManager {
     }
 
     makeSetEditable(setElement) {
-        const reps = setElement.querySelector('.actual').textContent.match(/\d+/)[0];
-        const weight = setElement.querySelector('.planned').textContent.match(/\d+(\.\d+)?/)[0];
+        const actualText = setElement.querySelector('.actual').textContent;
+        const plannedText = setElement.querySelector('.planned').textContent;
+        const setId = setElement.dataset.setId;
+        
+        const reps = actualText.match(/\d+/)[0];
+        const weight = plannedText.match(/\d+(\.\d+)?/)[0];
+        const unit = storage.getSettings().units;
         
         setElement.innerHTML = `
             <span class="set-number">${setElement.querySelector('.set-number').textContent}</span>
-            <div class="edit-set-form">
-                <input type="number" class="edit-reps" value="${reps}" min="0" max="${CircuitManager.LIMITS.REPS_MAX}">
-                <input type="number" class="edit-weight" value="${weight}" min="0" max="${CircuitManager.LIMITS.WEIGHT_MAX}" step="0.5">
+            <div class="edit-set-form" data-set-id="${setId}">
+                <div class="edit-field">
+                    <label>Reps:</label>
+                    <input type="number" class="edit-reps" value="${reps}" min="0" max="${CircuitManager.LIMITS.REPS_MAX}">
+                </div>
+                <div class="edit-field">
+                    <label>Weight (${unit}):</label>
+                    <input type="number" class="edit-weight" value="${weight}" min="0" max="${CircuitManager.LIMITS.WEIGHT_MAX}" step="0.5">
+                </div>
                 <button class="update-set-btn">Update</button>
+                <button class="cancel-edit-btn">Cancel</button>
             </div>
         `;
+
+        // Add cancel button handler
+        setElement.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+            const completion = ((parseInt(reps) / parseInt(plannedText.match(/\d+/)[0])) * 100).toFixed(1);
+            setElement.innerHTML = `
+                <span class="set-number">${setElement.querySelector('.set-number').textContent}</span>
+                <span class="planned">${plannedText}</span>
+                <span class="actual">Completed: ${reps} reps (${completion}%)</span>
+                <button class="edit-set-btn">Edit</button>
+            `;
+            
+            // Reattach edit button handler
+            setElement.querySelector('.edit-set-btn').addEventListener('click', () => {
+                if (!setElement.querySelector('.edit-set-form')) {
+                    this.makeSetEditable(setElement);
+                }
+            });
+        });
     }
 
     ensureStyles() {
@@ -232,26 +268,72 @@ class CircuitManager {
             styles.textContent = `
                 .set-summary {
                     position: relative;
+                    padding: 0.5rem;
+                    background: var(--background-secondary);
+                    border-radius: 4px;
+                    margin-bottom: 0.5rem;
                 }
                 .edit-set-form {
                     display: flex;
-                    gap: 0.5rem;
+                    flex-wrap: wrap;
+                    gap: 1rem;
                     align-items: center;
                     margin-top: 0.5rem;
                 }
+                .edit-field {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.25rem;
+                }
+                .edit-field label {
+                    font-size: 0.9rem;
+                    color: var(--text-secondary);
+                }
                 .edit-set-form input {
-                    width: 80px;
-                    padding: 0.25rem;
+                    width: 100px;
+                    padding: 0.5rem;
+                    border: 1px solid var(--border-color);
+                    border-radius: 4px;
+                    background: var(--background-primary);
+                    color: var(--text-primary);
+                }
+                .edit-set-form input:focus {
+                    outline: none;
+                    border-color: var(--primary-color);
+                }
+                .update-set-btn, .cancel-edit-btn {
+                    padding: 0.5rem 1rem;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: 500;
                 }
                 .update-set-btn {
+                    background: var(--primary-color);
+                    color: white;
+                }
+                .update-set-btn:hover {
+                    background: var(--primary-color-dark);
+                }
+                .cancel-edit-btn {
+                    background: var(--background-primary);
+                    color: var(--text-primary);
+                    border: 1px solid var(--border-color);
+                }
+                .cancel-edit-btn:hover {
+                    background: var(--background-secondary);
+                }
+                .edit-set-btn {
                     padding: 0.25rem 0.5rem;
                     background: var(--primary-color);
                     color: white;
                     border: none;
                     border-radius: 4px;
                     cursor: pointer;
+                    font-size: 0.9rem;
+                    margin-left: 0.5rem;
                 }
-                .update-set-btn:hover {
+                .edit-set-btn:hover {
                     background: var(--primary-color-dark);
                 }
             `;

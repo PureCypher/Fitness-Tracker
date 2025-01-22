@@ -485,6 +485,7 @@ class WeightliftingManager {
             const completion = ((set.actualReps / set.plannedReps) * 100).toFixed(1);
             const setDiv = InputValidator.createSafeElement('div', { 
                 class: 'set-summary',
+                'data-set-id': set.id,
                 'data-set-index': index.toString()
             });
             
