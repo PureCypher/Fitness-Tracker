@@ -129,8 +129,8 @@ class CardioManager {
         this.form.datetime.value = `${year}-${month}-${day}T${hours}:${minutes}`;
 
         this.refreshLog();
-        ui.updateDashboard();
         document.dispatchEvent(new Event('cardioUpdated'));
+        document.dispatchEvent(new Event('workoutLogged'));
         ui.showNotification('Cardio session logged successfully!');
     }
 

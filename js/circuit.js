@@ -206,9 +206,9 @@ class CircuitManager {
         this.exerciseList.innerHTML = '';
         this.addExerciseToCircuit(); // Add one empty exercise entry
         document.querySelector('#weightlifting-log').scrollIntoView({ behavior: 'smooth' });
-        ui.showNotification('Circuit workout logged successfully!');
-        ui.updateDashboard();
         document.dispatchEvent(new Event('weightliftingUpdated'));
+        document.dispatchEvent(new Event('workoutLogged'));
+        ui.showNotification('Circuit workout logged successfully!');
     }
 
     handleSetUpdate(button) {

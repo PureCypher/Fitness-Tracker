@@ -84,6 +84,20 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.updateActiveGoals();
         calendar.refresh();
     });
+
+    document.addEventListener('cardioUpdated', () => {
+        ui.updateDashboard();
+        storage.updateAllGoalsProgress();
+        ui.updateActiveGoals();
+        calendar.refresh();
+    });
+
+    document.addEventListener('mealsUpdated', () => {
+        ui.updateDashboard();
+        storage.updateAllGoalsProgress();
+        ui.updateActiveGoals();
+        calendar.refresh();
+    });
 });
 
 // Handle service worker for offline support
