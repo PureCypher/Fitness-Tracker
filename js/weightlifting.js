@@ -3,8 +3,7 @@ class WeightliftingManager {
         EXERCISE_NAME_MAX: 100,
         NOTES_MAX: 1000,
         WEIGHT_MAX: 2000,
-        REPS_MAX: 100,
-        SETS_MAX: 10
+        REPS_MAX: 100
     };
 
     constructor() {
@@ -115,11 +114,8 @@ class WeightliftingManager {
     }
 
     updateSetsInputs() {
-        const numSets = InputValidator.validateNumber(
-            this.form.querySelector('#num-sets').value,
-            1,
-            WeightliftingManager.LIMITS.SETS_MAX
-        ) || 1;
+        const numSetsInput = this.form.querySelector('#num-sets').value;
+        const numSets = parseInt(numSetsInput) || 3; // Default to 3 if invalid input
         
         this.form.querySelector('#num-sets').value = numSets;
         

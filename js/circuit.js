@@ -4,7 +4,7 @@ class CircuitManager {
         NOTES_MAX: 1000,
         WEIGHT_MAX: 2000,
         REPS_MAX: 100,
-        EXERCISES_MAX: 10
+        EXERCISES_MAX: 999 // Virtually unlimited
     };
 
     constructor() {
@@ -58,7 +58,6 @@ class CircuitManager {
                     <input type="number" 
                         class="circuit-sets" 
                         min="1" 
-                        max="${CircuitManager.LIMITS.SETS_MAX}" 
                         pattern="[0-9]*"
                         inputmode="numeric"
                         required>
