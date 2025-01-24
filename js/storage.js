@@ -29,7 +29,6 @@ class StorageManager {
             });
         }
         if (!localStorage.getItem(this.KEYS.GOALS)) {
-            console.log('Initializing empty goals');
             this.saveGoals({
                 weekly: [],
                 monthly: [],
@@ -338,14 +337,11 @@ class StorageManager {
         
         // Get weightlifting summary
         const allData = this.getWeightlifting();
-        console.log('All weightlifting data:', allData);
         
         const weightliftingData = allData.filter(entry => {
             const entryDate = new Date(entry.date).toISOString().split('T')[0];
-            console.log('Comparing dates:', entryDate, today);
             return entryDate === today;
         });
-        console.log('Filtered weightlifting data:', weightliftingData);
         const weightlifting = {
             totalSets: weightliftingData.reduce((sum, entry) => sum + entry.sets.length, 0),
             plannedReps: weightliftingData.reduce((sum, entry) => 
@@ -389,6 +385,7 @@ class StorageManager {
             meals
         };
     }
+
 
     // Water Tracking Methods
     getWaterIntake() {
@@ -567,6 +564,81 @@ class StorageManager {
         startDate.setDate(startDate.getDate() - daysToShow);
 
         return convertedLogs.filter(log => new Date(log.date) >= startDate);
+    }
+
+    addMeal(mealData) {
+        const meals = this.getMeals();
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Initialize today's meals array if it doesn't exist
+        if (!meals[today]) {
+            meals[today] = [];
+        }
+
+        // Create new meal entry with ID
+        const newMeal = {
+            ...mealData,
+            id: Date.now()
+        };
+
+        // Add meal to today's array
+        meals[today].push(newMeal);
+        
+        // Save updated meals object
+        this.saveMeals(meals);
+        
+        return newMeal;
+    }
+
+    updateMeal(date, mealId, mealData) {
+        const meals = this.getMeals();
+        
+        // Check if we have meals for this date
+        if (!meals[date]) {
+            return false;
+        }
+
+        // Find the meal to update
+        const mealIndex = meals[date].findIndex(meal => meal.id === mealId);
+        if (mealIndex === -1) {
+            return false;
+        }
+
+        // Update the meal while preserving its ID
+        meals[date][mealIndex] = {
+            ...mealData,
+            id: mealId
+        };
+
+        // Save updated meals
+        this.saveMeals(meals);
+        return true;
+    }
+
+    deleteMeal(date, mealId) {
+        const meals = this.getMeals();
+        
+        // Check if we have meals for this date
+        if (!meals[date]) {
+            return false;
+        }
+
+        // Find and remove the meal
+        const mealIndex = meals[date].findIndex(meal => meal.id === mealId);
+        if (mealIndex === -1) {
+            return false;
+        }
+
+        meals[date].splice(mealIndex, 1);
+        
+        // Remove the date entry if no meals left
+        if (meals[date].length === 0) {
+            delete meals[date];
+        }
+
+        // Save updated meals
+        this.saveMeals(meals);
+        return true;
     }
 
     clearAllData() {
