@@ -75,12 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('workoutLogged', () => {
         storage.updateAllGoalsProgress();
         ui.updateActiveGoals();
+        calendar.refresh();
     });
 
     document.addEventListener('weightliftingUpdated', () => {
         ui.updateDashboard();
         storage.updateAllGoalsProgress();
         ui.updateActiveGoals();
+        calendar.refresh();
     });
 });
 
