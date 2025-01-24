@@ -71,8 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Update goals when workouts are logged
+    // Update UI when workouts are logged or updated
     document.addEventListener('workoutLogged', () => {
+        storage.updateAllGoalsProgress();
+        ui.updateActiveGoals();
+    });
+
+    document.addEventListener('weightliftingUpdated', () => {
+        ui.updateDashboard();
         storage.updateAllGoalsProgress();
         ui.updateActiveGoals();
     });

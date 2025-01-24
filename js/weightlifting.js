@@ -341,8 +341,8 @@ class WeightliftingManager {
         this.initializeDateTime();
         this.updateSetsInputs();
         this.refreshLog();
-        ui.updateDashboard();
         document.dispatchEvent(new Event('weightliftingUpdated'));
+        document.dispatchEvent(new Event('workoutLogged'));
         ui.showNotification('Weightlifting exercise logged successfully!');
     }
 
