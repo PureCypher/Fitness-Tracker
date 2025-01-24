@@ -451,19 +451,27 @@ class ChartManager {
     }
 
     updateWeightChart() {
-        const { start, end } = this.getDateRange();
-        const weightData = storage.getWeightHistory(this.timeRangeFilter);
-        
-        // Sort data by date
-        weightData.sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        const labels = weightData.map(entry => entry.date);
-        const weights = weightData.map(entry => entry.weight);
+        try {
+            const weightData = window.weightManager.getWeightDataForChart(this.timeRangeFilter);
+            
+            if (!weightData || !Array.isArray(weightData)) {
+                console.warn('No valid weight data available');
+                return;
+            }
+            
+            // Sort data by date
+            weightData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            const labels = weightData.map(entry => entry.date);
+            const weights = weightData.map(entry => entry.weight);
 
-        this.charts.weight.data.labels = labels;
-        this.charts.weight.data.datasets[0].data = weights;
-        this.charts.weight.options.scales.y.title.text = `Weight (${storage.getSettings().units})`;
-        this.charts.weight.update();
+            this.charts.weight.data.labels = labels;
+            this.charts.weight.data.datasets[0].data = weights;
+            this.charts.weight.options.scales.y.title.text = `Weight (${storage.getSettings().units})`;
+            this.charts.weight.update();
+        } catch (error) {
+            console.error('Error updating weight chart:', error);
+        }
     }
 
     updateDistributionChart() {
