@@ -150,19 +150,32 @@ class WeightliftingManager {
                     <div class="form-group">
                         <label for="weight-${i}">Weight (${storage.getSettings().units}):</label>
                         <input type="number" id="weight-${i}" class="set-weight" 
-                            min="0" max="${WeightliftingManager.LIMITS.WEIGHT_MAX}" step="0.5" required
+                            min="0" 
+                            max="${WeightliftingManager.LIMITS.WEIGHT_MAX}" 
+                            step="0.5" 
+                            pattern="[0-9]*"
+                            inputmode="decimal"
+                            required
                             value="${InputValidator.sanitizeText(currentSet.weight || '')}">
                     </div>
                     <div class="form-group">
                         <label for="planned-reps-${i}">Planned Reps:</label>
                         <input type="number" id="planned-reps-${i}" class="set-planned-reps" 
-                            min="1" max="${WeightliftingManager.LIMITS.REPS_MAX}" required
+                            min="1" 
+                            max="${WeightliftingManager.LIMITS.REPS_MAX}" 
+                            pattern="[0-9]*"
+                            inputmode="numeric"
+                            required
                             value="${InputValidator.sanitizeText(currentSet.plannedReps || '')}">
                     </div>
                     <div class="form-group">
                         <label for="actual-reps-${i}">Actual Reps:</label>
                         <input type="number" id="actual-reps-${i}" class="set-actual-reps" 
-                            min="0" max="${WeightliftingManager.LIMITS.REPS_MAX}" required
+                            min="0" 
+                            max="${WeightliftingManager.LIMITS.REPS_MAX}" 
+                            pattern="[0-9]*"
+                            inputmode="numeric"
+                            required
                             value="${InputValidator.sanitizeText(currentSet.actualReps || '')}">
                     </div>
                 </div>

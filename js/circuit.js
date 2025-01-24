@@ -55,15 +55,34 @@ class CircuitManager {
                 </div>
                 <div class="form-group">
                     <label>Sets:</label>
-                    <input type="number" class="circuit-sets" min="1" max="${CircuitManager.LIMITS.SETS_MAX}" required>
+                    <input type="number" 
+                        class="circuit-sets" 
+                        min="1" 
+                        max="${CircuitManager.LIMITS.SETS_MAX}" 
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                        required>
                 </div>
                 <div class="form-group">
                     <label>Reps per Set:</label>
-                    <input type="number" class="circuit-reps" min="1" max="${CircuitManager.LIMITS.REPS_MAX}" required>
+                    <input type="number" 
+                        class="circuit-reps" 
+                        min="1" 
+                        max="${CircuitManager.LIMITS.REPS_MAX}" 
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                        required>
                 </div>
                 <div class="form-group">
                     <label>Weight (${storage.getSettings().units}):</label>
-                    <input type="number" class="circuit-weight" min="0" max="${CircuitManager.LIMITS.WEIGHT_MAX}" step="0.5" required>
+                    <input type="number" 
+                        class="circuit-weight" 
+                        min="0" 
+                        max="${CircuitManager.LIMITS.WEIGHT_MAX}" 
+                        step="0.5"
+                        pattern="[0-9]*"
+                        inputmode="decimal"
+                        required>
                 </div>
                 <button type="button" class="remove-exercise" onclick="circuitManager.removeExercise(this)">Remove</button>
             </div>
@@ -232,11 +251,24 @@ class CircuitManager {
             <div class="edit-set-form" data-set-id="${setId}">
                 <div class="edit-field">
                     <label>Reps:</label>
-                    <input type="number" class="edit-reps" value="${reps}" min="0" max="${CircuitManager.LIMITS.REPS_MAX}">
+                    <input type="number" 
+                        class="edit-reps" 
+                        value="${reps}" 
+                        min="0" 
+                        max="${CircuitManager.LIMITS.REPS_MAX}"
+                        pattern="[0-9]*"
+                        inputmode="numeric">
                 </div>
                 <div class="edit-field">
                     <label>Weight (${unit}):</label>
-                    <input type="number" class="edit-weight" value="${weight}" min="0" max="${CircuitManager.LIMITS.WEIGHT_MAX}" step="0.5">
+                    <input type="number" 
+                        class="edit-weight" 
+                        value="${weight}" 
+                        min="0" 
+                        max="${CircuitManager.LIMITS.WEIGHT_MAX}" 
+                        step="0.5"
+                        pattern="[0-9]*"
+                        inputmode="decimal">
                 </div>
                 <button class="update-set-btn">Update</button>
                 <button class="cancel-edit-btn">Cancel</button>
