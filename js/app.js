@@ -40,22 +40,36 @@ notificationStyles.textContent = `
 document.head.appendChild(notificationStyles);
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
+function initializeApp() {
+    // Ensure all required globals are available
+    const missingManagers = [];
+    if (typeof window.ui === 'undefined') missingManagers.push('ui');
+    if (typeof window.storage === 'undefined') missingManagers.push('storage');
+    if (typeof window.calendar === 'undefined') missingManagers.push('calendar');
+    
+    if (missingManagers.length > 0) {
+        console.error(`Required managers not available yet: ${missingManagers.join(', ')}. Retrying...`);
+        setTimeout(initializeApp, 100); // Retry after 100ms
+        return;
+    }
+    
+    console.log('All managers loaded successfully. Initializing app...');
+    
     // Update dashboard, goals, and meals on load
-    ui.updateDashboard();
-    ui.setupGoalForm();
-    ui.updateActiveGoals();
-    ui.updateTrophyDisplay();
+    window.ui.updateDashboard();
+    window.ui.setupGoalForm();
+    window.ui.updateActiveGoals();
+    window.ui.updateTrophyDisplay();
 
     // Custom event for meal logging
     document.addEventListener('mealLogged', () => {
-        ui.updateDashboard();
+        window.ui.updateDashboard();
     });
 
     // Set up goal progress update interval
     setInterval(() => {
-        storage.updateAllGoalsProgress();
-        ui.updateActiveGoals();
+        window.storage.updateAllGoalsProgress();
+        window.ui.updateActiveGoals();
     }, 60000); // Check progress every minute
 
     // Add keyboard shortcuts
@@ -65,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = parseInt(e.key) - 1;
             const views = ['dashboard', 'weightlifting', 'cardio', 'goals', 'settings'];
             if (views[index]) {
-                ui.switchView(views[index]);
+                window.ui.switchView(views[index]);
                 e.preventDefault();
             }
         }
@@ -73,32 +87,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update UI when workouts are logged or updated
     document.addEventListener('workoutLogged', () => {
-        storage.updateAllGoalsProgress();
-        ui.updateActiveGoals();
-        calendar.refresh();
+        window.storage.updateAllGoalsProgress();
+        window.ui.updateActiveGoals();
+        window.calendar.refresh();
     });
 
     document.addEventListener('weightliftingUpdated', () => {
-        ui.updateDashboard();
-        storage.updateAllGoalsProgress();
-        ui.updateActiveGoals();
-        calendar.refresh();
+        window.ui.updateDashboard();
+        window.storage.updateAllGoalsProgress();
+        window.ui.updateActiveGoals();
+        window.calendar.refresh();
     });
 
     document.addEventListener('cardioUpdated', () => {
-        ui.updateDashboard();
-        storage.updateAllGoalsProgress();
-        ui.updateActiveGoals();
-        calendar.refresh();
+        window.ui.updateDashboard();
+        window.storage.updateAllGoalsProgress();
+        window.ui.updateActiveGoals();
+        window.calendar.refresh();
     });
 
     document.addEventListener('mealsUpdated', () => {
-        ui.updateDashboard();
-        storage.updateAllGoalsProgress();
-        ui.updateActiveGoals();
-        calendar.refresh();
+        window.ui.updateDashboard();
+        window.storage.updateAllGoalsProgress();
+        window.ui.updateActiveGoals();
+        window.calendar.refresh();
     });
-});
+}
+
+// Start initialization when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeApp);
 
 // Handle service worker for offline support
 if ('serviceWorker' in navigator) {

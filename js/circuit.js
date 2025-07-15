@@ -11,6 +11,8 @@ class CircuitManager {
         this.form = document.getElementById('circuit-form');
         this.exerciseList = document.getElementById('circuit-exercise-list');
         this.logContainer = document.getElementById('weightlifting-log');
+        this.circuitTrainingTypeSelect = this.form.querySelector('#circuit-training-type');
+        this.circuitTrainingTypeTooltip = this.form.querySelector('#circuit-training-type-tooltip');
         this.setupEventListeners();
     }
 
@@ -28,12 +30,50 @@ class CircuitManager {
             this.addExerciseToCircuit();
         });
 
+        this.circuitTrainingTypeSelect.addEventListener('change', () => {
+            this.updateCircuitTrainingTypeTooltip(this.circuitTrainingTypeSelect.value);
+        });
+
         // Listen for set updates
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('update-set-btn')) {
                 this.handleSetUpdate(e.target);
             }
         });
+    }
+
+    updateCircuitTrainingTypeTooltip(circuitType) {
+        const descriptions = {
+            'traditional': 'Standard circuit with rest between exercises',
+            'timed': 'Fixed time intervals for each exercise or round',
+            'emom': 'Complete prescribed reps within each minute',
+            'amrap': 'Perform as many rounds as possible in set time',
+            'tabata': '20 seconds work, 10 seconds rest (8 rounds)',
+            'supersets': 'Paired exercises performed back-to-back',
+            'compound': 'Multi-movement exercises combining muscle groups',
+            'ladder': 'Increase reps each round (1,2,3,4,5...)',
+            'descending': 'Decrease reps each round (10,9,8,7,6...)',
+            'ascending': 'Increase difficulty or complexity each round',
+            'hiit': 'High-intensity intervals with rest periods',
+            'strength-circuit': 'Heavy resistance exercises in circuit format',
+            'metabolic': 'High-intensity exercises for metabolic conditioning',
+            'bodyweight': 'No equipment needed, bodyweight movements only',
+            'functional': 'Real-world movement patterns and multi-joint exercises',
+            'power': 'Explosive, fast movements for power development',
+            'endurance': 'Longer duration, moderate intensity for stamina',
+            'hybrid': 'Combines multiple training methods in one circuit',
+            'chipper': 'Complete total rep count as fast as possible',
+            'death-by': 'Add one rep each minute until failure'
+        };
+        
+        const description = descriptions[circuitType];
+        if (description) {
+            this.circuitTrainingTypeTooltip.textContent = description;
+            this.circuitTrainingTypeTooltip.classList.add('active');
+        } else {
+            this.circuitTrainingTypeTooltip.textContent = '';
+            this.circuitTrainingTypeTooltip.classList.remove('active');
+        }
     }
 
     addExerciseToCircuit() {
@@ -176,9 +216,12 @@ class CircuitManager {
             throw new Error('Notes too long');
         }
 
+        const circuitTrainingType = this.form.querySelector('#circuit-training-type').value;
+        
         return {
             exercises,
             notes,
+            circuitTrainingType,
             date: new Date(this.form.querySelector('#circuit-datetime').value).toISOString()
         };
     }
@@ -197,6 +240,7 @@ class CircuitManager {
                     actualReps: exercise.reps // Assuming completed as planned
                 }),
                 notes: circuitData.notes,
+                circuitType: circuitData.circuitTrainingType,
                 date: circuitData.date
             };
             storage.addWeightliftingEntry(entry);
@@ -395,4 +439,4 @@ class CircuitManager {
 }
 
 // Create a global instance
-const circuitManager = new CircuitManager();
+window.circuitManager = new CircuitManager();

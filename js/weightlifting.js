@@ -13,7 +13,14 @@ class WeightliftingManager {
         this.categorySelect = this.form.querySelector('#exercise-category');
         this.subcategorySelect = this.form.querySelector('#exercise-subcategory');
         this.exerciseSelect = this.form.querySelector('#exercise');
-        this.exerciseTooltip = this.form.querySelector('#exercise-tooltip');
+        this.exerciseInfoPanel = this.form.querySelector('#exercise-info-panel');
+        this.exerciseNameDisplay = this.form.querySelector('#exercise-name-display');
+        this.exerciseCategoryDisplay = this.form.querySelector('#exercise-category-display');
+        this.exerciseSubcategoryDisplay = this.form.querySelector('#exercise-subcategory-display');
+        this.exerciseDescriptionText = this.form.querySelector('#exercise-description-text');
+        this.toggleExerciseInfoBtn = this.form.querySelector('#toggle-exercise-info');
+        this.trainingTypeSelect = this.form.querySelector('#training-type');
+        this.trainingTypeTooltip = this.form.querySelector('#training-type-tooltip');
         
         this.setupEventListeners();
         this.initializeDateTime();
@@ -36,8 +43,11 @@ class WeightliftingManager {
     updateSubcategories(category) {
         this.subcategorySelect.innerHTML = '<option value="">Select Type</option>';
         this.exerciseSelect.innerHTML = '<option value="">Select Exercise</option>';
-        this.exerciseTooltip.textContent = '';
-        this.exerciseTooltip.classList.remove('active');
+        
+        // Hide exercise info panel when category changes
+        if (this.exerciseInfoPanel) {
+            this.exerciseInfoPanel.classList.add('hidden');
+        }
 
         if (category && WORKOUTS[category]) {
             Object.keys(WORKOUTS[category]).forEach(subcategory => {
@@ -49,8 +59,11 @@ class WeightliftingManager {
 
     updateExercises(category, subcategory) {
         this.exerciseSelect.innerHTML = '<option value="">Select Exercise</option>';
-        this.exerciseTooltip.textContent = '';
-        this.exerciseTooltip.classList.remove('active');
+        
+        // Hide exercise info panel when subcategory changes
+        if (this.exerciseInfoPanel) {
+            this.exerciseInfoPanel.classList.add('hidden');
+        }
 
         if (category && subcategory && WORKOUTS[category]?.[subcategory]) {
             Object.keys(WORKOUTS[category][subcategory]).forEach(exercise => {
@@ -60,15 +73,248 @@ class WeightliftingManager {
         }
     }
 
-    updateTooltip(exercise) {
-        const description = getExerciseDescription(exercise);
-        if (description) {
-            this.exerciseTooltip.textContent = description;
-            this.exerciseTooltip.classList.add('active');
-        } else {
-            this.exerciseTooltip.textContent = '';
-            this.exerciseTooltip.classList.remove('active');
+    
+    updateExerciseInfo(exerciseName) {
+        if (!exerciseName) {
+            this.exerciseInfoPanel.classList.add('hidden');
+            return;
         }
+        
+        const exerciseInfo = getExerciseInfo(exerciseName);
+        if (!exerciseInfo) {
+            this.exerciseInfoPanel.classList.add('hidden');
+            return;
+        }
+        
+        // Update exercise info display
+        if (this.exerciseNameDisplay) this.exerciseNameDisplay.textContent = exerciseInfo.name;
+        if (this.exerciseCategoryDisplay) this.exerciseCategoryDisplay.textContent = exerciseInfo.category;
+        if (this.exerciseSubcategoryDisplay) this.exerciseSubcategoryDisplay.textContent = exerciseInfo.subcategory;
+        if (this.exerciseDescriptionText) this.exerciseDescriptionText.textContent = exerciseInfo.description;
+        
+        // Update exercise tips
+        const tips = generateExerciseTips(exerciseInfo.category, exerciseInfo.subcategory, exerciseInfo.name);
+        const tipsList = document.getElementById('exercise-tips-list');
+        if (tipsList) {
+            tipsList.innerHTML = '';
+            tips.forEach(tip => {
+                const li = document.createElement('li');
+                li.textContent = tip;
+                tipsList.appendChild(li);
+            });
+        }
+        
+        
+        // Show the panel
+        this.exerciseInfoPanel.classList.remove('hidden');
+        
+        // Reset toggle button state
+        if (this.toggleExerciseInfoBtn) {
+            this.toggleExerciseInfoBtn.classList.remove('collapsed');
+            const toggleText = this.toggleExerciseInfoBtn.querySelector('.toggle-text');
+            if (toggleText) toggleText.textContent = 'Hide Details';
+        }
+    }
+    
+    toggleExerciseInfoPanel() {
+        if (!this.exerciseInfoPanel || !this.toggleExerciseInfoBtn) return;
+        
+        const exerciseContent = this.exerciseInfoPanel.querySelector('.exercise-content');
+        const isCollapsed = this.toggleExerciseInfoBtn.classList.contains('collapsed');
+        const toggleText = this.toggleExerciseInfoBtn.querySelector('.toggle-text');
+        
+        if (isCollapsed) {
+            // Expand
+            if (exerciseContent) exerciseContent.style.display = 'grid';
+            this.toggleExerciseInfoBtn.classList.remove('collapsed');
+            if (toggleText) toggleText.textContent = 'Hide Details';
+        } else {
+            // Collapse
+            if (exerciseContent) exerciseContent.style.display = 'none';
+            this.toggleExerciseInfoBtn.classList.add('collapsed');
+            if (toggleText) toggleText.textContent = 'Show Details';
+        }
+    }
+
+    updateTrainingTypeTooltip(trainingType) {
+        const descriptions = {
+            'straight': 'Traditional sets with same weight and reps throughout',
+            'pyramid': 'Increase weight and decrease reps each set',
+            'reverse-pyramid': 'Start heavy with low reps, decrease weight and increase reps',
+            'drop-set': 'Perform a set to failure, then immediately reduce weight and continue',
+            'double-drop': 'Drop weight twice in same set after reaching failure',
+            'triple-drop': 'Drop weight three times in same set after reaching failure',
+            'superset': 'Two exercises performed back-to-back without rest',
+            'triset': 'Three exercises performed consecutively without rest',
+            'giant-set': 'Four or more exercises performed consecutively without rest',
+            'cluster': 'Break each set into mini-sets with short rests between',
+            'rest-pause': 'Perform set to failure, rest 10-15 seconds, repeat',
+            'mechanical-drop': 'Change exercise variation to an easier movement when fatigued',
+            'tempo': 'Focus on controlled movement speed (e.g., 3-1-2-1 tempo)',
+            'negative': 'Emphasize the eccentric (lowering) portion of the movement',
+            'partial-reps': 'Perform reps through partial range of motion',
+            'isometric': 'Hold weight in static position for time',
+            'pre-exhaust': 'Isolate muscle before compound exercise',
+            'post-exhaust': 'Isolate muscle after compound exercise',
+            'strip-set': 'Remove weight plates progressively during set',
+            'wave-loading': 'Undulating rep ranges within workout (3-5-3)',
+            'density': 'Complete more work in same time frame',
+            'contrast': 'Alternate heavy and explosive movements',
+            'accommodating': 'Variable resistance using bands or chains',
+            'pause-reps': 'Pause at bottom/top of movement for 1-3 seconds',
+            'speed-work': 'Focus on explosive, fast movement execution'
+        };
+        
+        const description = descriptions[trainingType];
+        if (description) {
+            this.trainingTypeTooltip.textContent = description;
+            this.trainingTypeTooltip.classList.add('active');
+        } else {
+            this.trainingTypeTooltip.textContent = '';
+            this.trainingTypeTooltip.classList.remove('active');
+        }
+    }
+
+    handleWorkoutTypeChange(typeBtn) {
+        // Update active workout type button
+        document.querySelectorAll('.workout-type-btn').forEach(btn => btn.classList.remove('active'));
+        typeBtn.classList.add('active');
+        
+        // Hide all forms and sections
+        document.querySelectorAll('.input-form').forEach(form => form.classList.add('hidden'));
+        
+        // Show the selected form/section
+        const workoutType = typeBtn.dataset.type;
+        switch (workoutType) {
+            case 'single':
+                this.form.classList.remove('hidden');
+                this.form.classList.add('active');
+                break;
+            case 'circuit':
+                document.getElementById('circuit-form')?.classList.remove('hidden');
+                break;
+            case 'timer':
+                document.getElementById('timer-section')?.classList.remove('hidden');
+                break;
+            case 'progress':
+                document.getElementById('progress-section')?.classList.remove('hidden');
+                // Update progress display when section is shown
+                if (window.progressTracker) {
+                    window.progressTracker.updateProgressDisplay();
+                }
+                break;
+        }
+    }
+
+    handlePresetClick(presetBtn) {
+        // Update active preset button
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+        presetBtn.classList.add('active');
+        
+        // Reset individual filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // Apply preset filter
+        const presetType = presetBtn.dataset.preset;
+        this.filterByPreset(presetType);
+    }
+
+    filterByPreset(presetType) {
+        const presetConfigurations = {
+            'all': [],
+            'beginner': ['straight', 'pyramid'],
+            'intermediate': ['straight', 'pyramid', 'reverse-pyramid', 'superset', 'drop-set', 'tempo'],
+            'advanced': ['drop-set', 'double-drop', 'triple-drop', 'superset', 'triset', 'giant-set', 'rest-pause', 'mechanical-drop', 'cluster', 'contrast', 'accommodating'],
+            'strength': ['straight', 'pyramid', 'reverse-pyramid', 'cluster', 'wave-loading', 'contrast', 'pause-reps'],
+            'hypertrophy': ['straight', 'drop-set', 'double-drop', 'superset', 'triset', 'giant-set', 'rest-pause', 'mechanical-drop', 'tempo', 'pre-exhaust', 'post-exhaust'],
+            'endurance': ['straight', 'density', 'circuit', 'metabolic', 'endurance', 'bodyweight', 'hiit'],
+            'power': ['straight', 'cluster', 'contrast', 'speed-work', 'power', 'accommodating'],
+            'intensity': ['drop-set', 'double-drop', 'triple-drop', 'rest-pause', 'density', 'tabata', 'amrap', 'emom', 'hiit', 'metabolic'],
+            'circuits': ['traditional', 'timed', 'emom', 'amrap', 'tabata', 'supersets', 'compound', 'ladder', 'descending', 'ascending', 'hiit', 'strength-circuit', 'metabolic', 'bodyweight', 'functional', 'power', 'endurance', 'hybrid', 'chipper', 'death-by']
+        };
+        
+        const allowedTypes = presetConfigurations[presetType] || [];
+        this.filterLogEntriesByPreset(allowedTypes, presetType === 'all');
+    }
+
+    filterLogEntriesByPreset(allowedTypes, showAll = false) {
+        const allEntries = this.logContainer.querySelectorAll('.log-entry, .circuit-entry');
+        
+        allEntries.forEach(entry => {
+            let shouldShow = showAll;
+            
+            if (!showAll) {
+                if (entry.classList.contains('circuit-entry')) {
+                    // For circuit entries, check if any circuit type matches
+                    shouldShow = allowedTypes.some(type => 
+                        ['traditional', 'timed', 'emom', 'amrap', 'tabata', 'supersets', 'compound', 
+                         'ladder', 'descending', 'ascending', 'hiit', 'strength-circuit', 'metabolic', 
+                         'bodyweight', 'functional', 'power', 'endurance', 'hybrid', 'chipper', 'death-by'].includes(type)
+                    );
+                } else {
+                    // For single exercises, check training type
+                    const trainingTypeSpan = entry.querySelector('.training-type');
+                    const entryTrainingType = trainingTypeSpan ? 
+                        trainingTypeSpan.textContent.toLowerCase().replace(/\s+/g, '-') : 
+                        'straight';
+                    shouldShow = allowedTypes.includes(entryTrainingType);
+                }
+            }
+            
+            entry.style.display = shouldShow ? 'block' : 'none';
+        });
+        
+        // Show/hide date groups
+        const dateGroups = this.logContainer.querySelectorAll('.log-date-group');
+        dateGroups.forEach(group => {
+            const visibleEntries = group.querySelectorAll('.log-entry:not([style*="display: none"]), .circuit-entry:not([style*="display: none"])');
+            group.style.display = visibleEntries.length > 0 ? 'block' : 'none';
+        });
+    }
+
+    handleFilterClick(filterBtn) {
+        // Update active filter button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        filterBtn.classList.add('active');
+        
+        // Apply filter
+        const filterType = filterBtn.dataset.filter;
+        this.filterLogEntries(filterType);
+    }
+
+    filterLogEntries(filterType) {
+        const allEntries = this.logContainer.querySelectorAll('.log-entry, .circuit-entry');
+        
+        allEntries.forEach(entry => {
+            let shouldShow = true;
+            
+            if (filterType === 'all') {
+                shouldShow = true;
+            } else if (filterType === 'circuit') {
+                shouldShow = entry.classList.contains('circuit-entry');
+            } else {
+                // For single exercises, check training type
+                if (entry.classList.contains('circuit-entry')) {
+                    shouldShow = false;
+                } else {
+                    const trainingTypeSpan = entry.querySelector('.training-type');
+                    const entryTrainingType = trainingTypeSpan ? 
+                        trainingTypeSpan.textContent.toLowerCase().replace(/\s+/g, '-') : 
+                        'straight';
+                    shouldShow = entryTrainingType === filterType || 
+                               (filterType === 'straight' && !trainingTypeSpan);
+                }
+            }
+            
+            entry.style.display = shouldShow ? 'block' : 'none';
+        });
+        
+        // Show/hide date groups if they have no visible entries
+        const dateGroups = this.logContainer.querySelectorAll('.log-date-group');
+        dateGroups.forEach(group => {
+            const visibleEntries = group.querySelectorAll('.log-entry:not([style*="display: none"]), .circuit-entry:not([style*="display: none"])');
+            group.style.display = visibleEntries.length > 0 ? 'block' : 'none';
+        });
     }
 
     initializeDateTime() {
@@ -109,7 +355,40 @@ class WeightliftingManager {
         });
 
         this.exerciseSelect.addEventListener('change', () => {
-            this.updateTooltip(this.exerciseSelect.value);
+            this.updateExerciseInfo(this.exerciseSelect.value);
+        });
+        
+        // Toggle exercise info panel
+        if (this.toggleExerciseInfoBtn) {
+            this.toggleExerciseInfoBtn.addEventListener('click', () => {
+                this.toggleExerciseInfoPanel();
+            });
+        }
+        
+        this.trainingTypeSelect.addEventListener('change', () => {
+            this.updateTrainingTypeTooltip(this.trainingTypeSelect.value);
+            this.updateSetsInputs(); // Update sets based on training type
+        });
+
+        // Filter event listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.handleFilterClick(e.target);
+            });
+        });
+
+        // Preset filter event listeners
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.handlePresetClick(e.target);
+            });
+        });
+
+        // Workout type selector event listeners
+        document.querySelectorAll('.workout-type-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.handleWorkoutTypeChange(e.target);
+            });
         });
     }
 
@@ -326,10 +605,13 @@ class WeightliftingManager {
             throw new Error('Notes too long');
         }
 
+        const trainingType = this.form.querySelector('#training-type').value;
+        
         return {
             exercise,
             sets,
             notes,
+            trainingType,
             date: new Date(this.form.datetime.value).toISOString()
         };
     }
@@ -478,6 +760,23 @@ class WeightliftingManager {
         // Create header
         const header = InputValidator.createSafeElement('div', { class: 'log-entry-header' });
         header.appendChild(InputValidator.createSafeElement('h4', {}, entry.exercise));
+        
+        // Add training type if present
+        if (entry.trainingType && entry.trainingType !== 'straight') {
+            const trainingTypeSpan = InputValidator.createSafeElement('span', { class: 'training-type' });
+            const trainingTypeNames = {
+                'pyramid': 'Pyramid',
+                'reverse-pyramid': 'Reverse Pyramid',
+                'drop-set': 'Drop Set',
+                'superset': 'Superset',
+                'cluster': 'Cluster Set',
+                'rest-pause': 'Rest-Pause',
+                'mechanical-drop': 'Mechanical Drop',
+                'tempo': 'Tempo Training'
+            };
+            trainingTypeSpan.textContent = trainingTypeNames[entry.trainingType] || entry.trainingType;
+            header.appendChild(trainingTypeSpan);
+        }
         
         if (!isCircuitExercise) {
             const deleteBtn = InputValidator.createSafeElement('button', { class: 'delete-btn' }, '×');
@@ -659,4 +958,4 @@ class WeightliftingManager {
 }
 
 // Create a global instance
-const weightlifting = new WeightliftingManager();
+window.weightlifting = new WeightliftingManager();

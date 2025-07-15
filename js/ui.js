@@ -29,28 +29,50 @@ class UIManager {
 
         // Dark mode toggle
         const darkModeToggle = document.getElementById('dark-mode-toggle');
-        darkModeToggle.addEventListener('change', () => {
-            this.toggleDarkMode(darkModeToggle.checked);
-        });
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', () => {
+                this.toggleDarkMode(darkModeToggle.checked);
+            });
+        }
 
         // Weight unit toggle
         const weightUnitSelect = document.getElementById('weight-unit');
-        weightUnitSelect.addEventListener('change', () => {
-            const settings = storage.getSettings();
-            settings.units = weightUnitSelect.value;
-            storage.saveSettings(settings);
-            this.updateWeightUnitDisplays(settings.units);
-            // Dispatch event for weight unit change
-            document.dispatchEvent(new Event('weightUnitChanged'));
-        });
+        if (weightUnitSelect) {
+            weightUnitSelect.addEventListener('change', () => {
+                const settings = window.storage.getSettings();
+                settings.units = weightUnitSelect.value;
+                window.storage.saveSettings(settings);
+                this.updateWeightUnitDisplays(settings.units);
+                // Dispatch event for weight unit change
+                document.dispatchEvent(new Event('weightUnitChanged'));
+            });
+        }
 
         // Data management
-        document.getElementById('export-data').addEventListener('click', this.handleExport.bind(this));
-        document.getElementById('import-data').addEventListener('click', () => {
-            document.getElementById('import-input').click();
-        });
-        document.getElementById('import-input').addEventListener('change', this.handleImport.bind(this));
-        document.getElementById('clear-data').addEventListener('click', this.handleClearData.bind(this));
+        const exportBtn = document.getElementById('export-data');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', this.handleExport.bind(this));
+        }
+        
+        const importBtn = document.getElementById('import-data');
+        if (importBtn) {
+            importBtn.addEventListener('click', () => {
+                const importInput = document.getElementById('import-input');
+                if (importInput) {
+                    importInput.click();
+                }
+            });
+        }
+        
+        const importInput = document.getElementById('import-input');
+        if (importInput) {
+            importInput.addEventListener('change', this.handleImport.bind(this));
+        }
+        
+        const clearBtn = document.getElementById('clear-data');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', this.handleClearData.bind(this));
+        }
     }
 
     switchWorkoutType(type) {
@@ -91,16 +113,28 @@ class UIManager {
     }
 
     loadSettings() {
-        const settings = storage.getSettings();
+        // Check if storage is available before accessing it
+        if (typeof window.storage === 'undefined') {
+            console.warn('Storage not available yet, skipping settings load');
+            return;
+        }
+        
+        const settings = window.storage.getSettings();
         
         // Load dark mode setting
-        document.getElementById('dark-mode-toggle').checked = settings.darkMode;
-        if (settings.darkMode) {
-            this.toggleDarkMode(true);
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        if (darkModeToggle) {
+            darkModeToggle.checked = settings.darkMode;
+            if (settings.darkMode) {
+                this.toggleDarkMode(true);
+            }
         }
 
         // Load weight unit setting
-        document.getElementById('weight-unit').value = settings.units;
+        const weightUnitSelect = document.getElementById('weight-unit');
+        if (weightUnitSelect) {
+            weightUnitSelect.value = settings.units;
+        }
         this.updateWeightUnitDisplays(settings.units);
     }
 
@@ -151,13 +185,13 @@ class UIManager {
 
     toggleDarkMode(enabled) {
         document.documentElement.setAttribute('data-theme', enabled ? 'dark' : 'light');
-        const settings = storage.getSettings();
+        const settings = window.storage.getSettings();
         settings.darkMode = enabled;
-        storage.saveSettings(settings);
+        window.storage.saveSettings(settings);
     }
 
     handleExport() {
-        const data = storage.exportData();
+        const data = window.storage.exportData();
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = InputValidator.createSafeElement('a', {
@@ -176,7 +210,7 @@ class UIManager {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const success = storage.importData(e.target.result);
+            const success = window.storage.importData(e.target.result);
             if (success) {
                 alert('Data imported successfully!');
                 window.location.reload();
@@ -190,14 +224,14 @@ class UIManager {
 
     handleClearData() {
         if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-            storage.clearAllData();
+            window.storage.clearAllData();
             window.location.reload();
         }
     }
 
     updateDashboard() {
-        const summary = storage.getTodaySummary();
-        const settings = storage.getSettings();
+        const summary = window.storage.getTodaySummary();
+        const settings = window.storage.getSettings();
         
         // Update weightlifting summary
         const weightlifting = summary.weightlifting || { totalSets: 0, plannedReps: 0, actualReps: 0, totalWeight: 0 };
@@ -207,7 +241,7 @@ class UIManager {
         document.getElementById('actual-reps').textContent = weightlifting.actualReps;
         
         // Get the first entry's unit (if any) to determine the stored unit
-        const entries = storage.getWeightlifting().filter(entry => {
+        const entries = window.storage.getWeightlifting().filter(entry => {
             const entryDate = new Date(entry.date).toISOString().split('T')[0];
             return entryDate === new Date().toISOString().split('T')[0];
         });
@@ -235,12 +269,12 @@ class UIManager {
     }
 
     updateActiveGoals() {
-        const goals = storage.getGoals();
+        const goals = window.storage.getGoals();
         const activeGoalsContainer = document.getElementById('active-goals');
         if (!activeGoalsContainer) return;
 
         // Update all goals progress first
-        storage.updateAllGoalsProgress();
+        window.storage.updateAllGoalsProgress();
 
         activeGoalsContainer.innerHTML = '';
         
@@ -285,7 +319,7 @@ class UIManager {
             const goalId = parseInt(e.target.dataset.goalId);
             const goalDuration = e.target.dataset.duration;
             if (confirm('Are you sure you want to delete this goal?')) {
-                storage.deleteGoal(goalDuration, goalId);
+                window.storage.deleteGoal(goalDuration, goalId);
                 this.updateActiveGoals();
                 this.updateTrophyDisplay();
             }
@@ -333,14 +367,14 @@ class UIManager {
                 return;
             }
 
-            const settings = storage.getSettings();
+            const settings = window.storage.getSettings();
             const goal = {
                 type: type,
                 target: target,
                 unit: type === 'weightlifting' ? settings.units : 'minutes'
             };
 
-            storage.addGoal(duration, goal);
+            window.storage.addGoal(duration, goal);
             this.updateActiveGoals();
             this.updateTrophyDisplay();
             form.reset();
@@ -353,13 +387,13 @@ class UIManager {
         
         typeSelect.addEventListener('change', () => {
             const type = typeSelect.value;
-            const settings = storage.getSettings();
+            const settings = window.storage.getSettings();
             unitLabel.textContent = type === 'weightlifting' ? settings.units : 'minutes';
         });
     }
 
     updateTrophyDisplay() {
-        const trophies = storage.getTrophies();
+        const trophies = window.storage.getTrophies();
         const container = document.getElementById('trophy-case');
         if (!container) return;
 
@@ -427,4 +461,10 @@ class UIManager {
 }
 
 // Create a global instance
-const ui = new UIManager();
+try {
+    console.log('Creating UIManager instance...');
+    window.ui = new UIManager();
+    console.log('UIManager created successfully:', window.ui);
+} catch (error) {
+    console.error('Error creating UIManager:', error);
+}

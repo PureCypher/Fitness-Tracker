@@ -97,6 +97,8 @@
                 <div class="workout-type-selector">
                     <button class="workout-type-btn active" data-type="single">Single Exercise</button>
                     <button class="workout-type-btn" data-type="circuit">Circuit Workout</button>
+                    <button class="workout-type-btn" data-type="timer">Rest Timer</button>
+                    <button class="workout-type-btn" data-type="progress">Progress Tracking</button>
                 </div>
                 <form id="weightlifting-form" class="input-form active">
                     <div class="form-group">
@@ -116,7 +118,73 @@
                         <select id="exercise" required>
                             <option value="">Select Exercise</option>
                         </select>
-                        <div id="exercise-tooltip" class="tooltip"></div>
+                        
+                        <!-- Enhanced Exercise Info Panel -->
+                        <div id="exercise-info-panel" class="exercise-info-panel hidden">
+                            <div class="exercise-info-header">
+                                <h4 id="exercise-name-display"></h4>
+                                <div class="exercise-meta">
+                                    <span id="exercise-category-display" class="exercise-category"></span>
+                                    <span id="exercise-subcategory-display" class="exercise-subcategory"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="exercise-content">
+                                <div class="exercise-details">
+                                    <div class="exercise-description">
+                                        <h5>How to perform:</h5>
+                                        <p id="exercise-description-text"></p>
+                                    </div>
+                                    
+                                    <div class="exercise-tips">
+                                        <h5>💡 Quick Tips:</h5>
+                                        <ul id="exercise-tips-list">
+                                            <li>Focus on proper form over heavy weight</li>
+                                            <li>Control the negative (lowering) portion</li>
+                                            <li>Breathe out during the exertion phase</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="exercise-info-footer">
+                                <button type="button" id="toggle-exercise-info" class="info-toggle-btn">
+                                    <span class="toggle-text">Hide Details</span>
+                                    <span class="toggle-icon">▼</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="training-type">Training Type:</label>
+                        <select id="training-type" required>
+                            <option value="straight">Straight Sets</option>
+                            <option value="pyramid">Pyramid</option>
+                            <option value="reverse-pyramid">Reverse Pyramid</option>
+                            <option value="drop-set">Drop Set</option>
+                            <option value="double-drop">Double Drop Set</option>
+                            <option value="triple-drop">Triple Drop Set</option>
+                            <option value="superset">Superset</option>
+                            <option value="triset">Triset</option>
+                            <option value="giant-set">Giant Set</option>
+                            <option value="cluster">Cluster Set</option>
+                            <option value="rest-pause">Rest-Pause</option>
+                            <option value="mechanical-drop">Mechanical Drop Set</option>
+                            <option value="tempo">Tempo Training</option>
+                            <option value="negative">Negative/Eccentric</option>
+                            <option value="partial-reps">Partial Reps</option>
+                            <option value="isometric">Isometric Hold</option>
+                            <option value="pre-exhaust">Pre-Exhaust</option>
+                            <option value="post-exhaust">Post-Exhaust</option>
+                            <option value="strip-set">Strip Set</option>
+                            <option value="wave-loading">Wave Loading</option>
+                            <option value="density">Density Training</option>
+                            <option value="contrast">Contrast Method</option>
+                            <option value="accommodating">Accommodating Resistance</option>
+                            <option value="pause-reps">Pause Reps</option>
+                            <option value="speed-work">Speed Work</option>
+                        </select>
+                        <div id="training-type-tooltip" class="tooltip"></div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -178,6 +246,33 @@
                 </form>
 
                 <form id="circuit-form" class="input-form hidden">
+                    <div class="form-group">
+                        <label for="circuit-training-type">Circuit Training Type:</label>
+                        <select id="circuit-training-type" required>
+                            <option value="traditional">Traditional Circuit</option>
+                            <option value="timed">Timed Circuit</option>
+                            <option value="emom">EMOM (Every Minute on the Minute)</option>
+                            <option value="amrap">AMRAP (As Many Rounds As Possible)</option>
+                            <option value="tabata">Tabata</option>
+                            <option value="supersets">Superset Chain</option>
+                            <option value="compound">Compound Circuit</option>
+                            <option value="ladder">Ladder Circuit</option>
+                            <option value="descending">Descending Circuit</option>
+                            <option value="ascending">Ascending Circuit</option>
+                            <option value="hiit">HIIT Circuit</option>
+                            <option value="strength-circuit">Strength Circuit</option>
+                            <option value="metabolic">Metabolic Circuit</option>
+                            <option value="bodyweight">Bodyweight Circuit</option>
+                            <option value="functional">Functional Circuit</option>
+                            <option value="power">Power Circuit</option>
+                            <option value="endurance">Endurance Circuit</option>
+                            <option value="hybrid">Hybrid Circuit</option>
+                            <option value="chipper">Chipper</option>
+                            <option value="death-by">Death By</option>
+                        </select>
+                        <div id="circuit-training-type-tooltip" class="tooltip"></div>
+                    </div>
+                    
                     <div id="circuit-exercise-list">
                         <!-- Circuit exercises will be dynamically added here -->
                     </div>
@@ -197,36 +292,366 @@
                     <button type="submit">Log Circuit</button>
                 </form>
 
+                <!-- Rest Timer -->
+                <div id="timer-section" class="input-form hidden">
+                    <h3>⏱️ Rest Timer</h3>
+                    
+                    <div class="timer-presets">
+                        <button class="timer-preset-btn" data-seconds="30">30s</button>
+                        <button class="timer-preset-btn" data-seconds="45">45s</button>
+                        <button class="timer-preset-btn" data-seconds="60">1m</button>
+                        <button class="timer-preset-btn" data-seconds="90">1m 30s</button>
+                        <button class="timer-preset-btn" data-seconds="120">2m</button>
+                        <button class="timer-preset-btn" data-seconds="180">3m</button>
+                        <button class="timer-preset-btn" data-seconds="300">5m</button>
+                    </div>
+
+                    <div class="custom-timer">
+                        <input type="number" id="custom-minutes" min="0" max="59" placeholder="Min" />
+                        <span>:</span>
+                        <input type="number" id="custom-seconds" min="0" max="59" placeholder="Sec" />
+                        <button id="start-custom-timer" class="secondary-btn">Start Custom</button>
+                    </div>
+
+                    <div class="timer-display">
+                        <div id="timer-circle" class="timer-circle">
+                            <div id="timer-text" class="timer-text">Ready</div>
+                        </div>
+                        <div class="timer-controls">
+                            <button id="timer-play-pause" class="timer-btn" disabled>▶️</button>
+                            <button id="timer-stop" class="timer-btn" disabled>⏹️</button>
+                            <button id="timer-reset" class="timer-btn" disabled>🔄</button>
+                        </div>
+                    </div>
+
+                    <div class="training-type-timers">
+                        <h4>Recommended Rest Times by Training Type:</h4>
+                        <div class="timer-recommendations">
+                            <span><strong>Strength:</strong> 3-5 minutes</span>
+                            <span><strong>Hypertrophy:</strong> 60-90 seconds</span>
+                            <span><strong>Power:</strong> 2-3 minutes</span>
+                            <span><strong>Endurance:</strong> 30-60 seconds</span>
+                            <span><strong>Drop Sets:</strong> 10-15 seconds</span>
+                            <span><strong>Supersets:</strong> 60-90 seconds</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Tracking -->
+                <div id="progress-section" class="input-form hidden">
+                    <h3>📈 Progress Tracking</h3>
+                    
+                    <div class="progress-overview">
+                        <div class="progress-card">
+                            <h4>🎯 Training Progression Level</h4>
+                            <div id="progression-level" class="progression-display">
+                                <div class="level-indicator">
+                                    <span class="level-text">Calculating...</span>
+                                    <div class="level-bar">
+                                        <div class="level-progress" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-card">
+                            <h4>🔥 Training Load Score</h4>
+                            <div id="training-load" class="load-display">
+                                <div class="load-value">0</div>
+                                <div class="load-label">Weekly Load</div>
+                            </div>
+                        </div>
+
+                        <div class="progress-card">
+                            <h4>📊 Training Type Distribution</h4>
+                            <canvas id="training-type-chart" width="300" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="recommendations-section">
+                        <h4>🎯 Personalized Recommendations</h4>
+                        <div id="exercise-recommendations" class="recommendations-list">
+                            <!-- Recommendations will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="achievement-section">
+                        <h4>🏆 Achievements</h4>
+                        <div id="achievements-list" class="achievements-grid">
+                            <!-- Achievements will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="log-filters">
+                    <h3>Quick Filter Presets:</h3>
+                    <div class="filter-presets">
+                        <button class="preset-btn active" data-preset="all">🔍 All Workouts</button>
+                        <button class="preset-btn" data-preset="beginner">🟢 Beginner</button>
+                        <button class="preset-btn" data-preset="intermediate">🟡 Intermediate</button>
+                        <button class="preset-btn" data-preset="advanced">🔴 Advanced</button>
+                        <button class="preset-btn" data-preset="strength">💪 Strength</button>
+                        <button class="preset-btn" data-preset="hypertrophy">🔥 Hypertrophy</button>
+                        <button class="preset-btn" data-preset="endurance">⚡ Endurance</button>
+                        <button class="preset-btn" data-preset="power">⚡ Power</button>
+                        <button class="preset-btn" data-preset="intensity">🚀 High Intensity</button>
+                        <button class="preset-btn" data-preset="circuits">🔄 Circuits</button>
+                    </div>
+                    
+                    <h3>Filter by Training Type:</h3>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All Types</button>
+                        <button class="filter-btn" data-filter="straight">Straight Sets</button>
+                        <button class="filter-btn" data-filter="pyramid">Pyramid</button>
+                        <button class="filter-btn" data-filter="drop-set">Drop Set</button>
+                        <button class="filter-btn" data-filter="superset">Superset</button>
+                        <button class="filter-btn" data-filter="rest-pause">Rest-Pause</button>
+                        <button class="filter-btn" data-filter="tempo">Tempo</button>
+                        <button class="filter-btn" data-filter="negative">Negative</button>
+                        <button class="filter-btn" data-filter="isometric">Isometric</button>
+                        <button class="filter-btn" data-filter="cluster">Cluster</button>
+                        <button class="filter-btn" data-filter="contrast">Contrast</button>
+                        <button class="filter-btn" data-filter="circuit">Circuits</button>
+                    </div>
+                </div>
+
                 <div id="weightlifting-log" class="log-container"></div>
             </section>
 
             <!-- Cardio View -->
             <section id="cardio" class="view">
-                <h2>Cardio Tracker</h2>
-                <form id="cardio-form" class="input-form">
-                    <div class="form-group">
-                        <label for="cardio-type">Type:</label>
-                        <select id="cardio-type" required>
-                            <option value="running">Running</option>
-                            <option value="cycling">Cycling</option>
-                            <option value="rowing">Rowing</option>
-                            <option value="swimming">Swimming</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
+                <h2>🏃 Cardio Tracker</h2>
+                
+                <!-- Cardio Type Selector -->
+                <div class="cardio-type-selector">
+                    <button class="cardio-type-btn active" data-type="quick">⚡ Quick Log</button>
+                    <button class="cardio-type-btn" data-type="detailed">📊 Detailed Log</button>
+                    <button class="cardio-type-btn" data-type="intervals">🔥 Intervals</button>
+                </div>
+
+                <!-- Quick Cardio Form -->
+                <form id="cardio-form" class="input-form active">
+                    <h3>Quick Cardio Entry</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="duration">Duration (min):</label>
-                            <input type="number" id="duration" min="1" required>
+                            <label for="cardio-type">Activity:</label>
+                            <select id="cardio-type" required>
+                                <option value="">Select Activity</option>
+                                <option value="running">🏃 Running</option>
+                                <option value="walking">🚶 Walking</option>
+                                <option value="cycling">🚴 Cycling</option>
+                                <option value="swimming">🏊 Swimming</option>
+                                <option value="rowing">🚣 Rowing</option>
+                                <option value="elliptical">⚡ Elliptical</option>
+                                <option value="stairmaster">📈 Stair Climber</option>
+                                <option value="jumping-rope">🪢 Jump Rope</option>
+                                <option value="dancing">💃 Dancing</option>
+                                <option value="hiking">🥾 Hiking</option>
+                                <option value="other">🔄 Other</option>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label for="heart-rate">Heart Rate (bpm):</label>
-                            <input type="number" id="heart-rate" min="0" placeholder="Optional">
+                            <label for="duration">Duration:</label>
+                            <div class="duration-input">
+                                <input type="number" id="duration" min="1" required placeholder="30">
+                                <select id="duration-unit">
+                                    <option value="minutes">minutes</option>
+                                    <option value="hours">hours</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <button type="submit">Log Cardio</button>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="intensity">Intensity:</label>
+                            <select id="intensity">
+                                <option value="low">😌 Low (Easy pace)</option>
+                                <option value="moderate">😊 Moderate (Comfortable)</option>
+                                <option value="high">😤 High (Challenging)</option>
+                                <option value="maximum">🔥 Maximum (All-out)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calories-burned">Calories (optional):</label>
+                            <input type="number" id="calories-burned" min="0" placeholder="Auto-calculated">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cardio-notes">Notes:</label>
+                        <textarea id="cardio-notes" rows="2" placeholder="How did this session feel? Any achievements or observations?"></textarea>
+                    </div>
+
+                    <button type="submit" class="primary-btn">📝 Log Cardio Session</button>
                 </form>
-                <div id="cardio-log" class="log-container"></div>
+
+                <!-- Detailed Cardio Form -->
+                <form id="detailed-cardio-form" class="input-form hidden">
+                    <h3>Detailed Cardio Entry</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="detailed-cardio-type">Activity:</label>
+                            <select id="detailed-cardio-type" required>
+                                <option value="">Select Activity</option>
+                                <option value="running">🏃 Running</option>
+                                <option value="walking">🚶 Walking</option>
+                                <option value="cycling">🚴 Cycling</option>
+                                <option value="swimming">🏊 Swimming</option>
+                                <option value="rowing">🚣 Rowing</option>
+                                <option value="elliptical">⚡ Elliptical</option>
+                                <option value="stairmaster">📈 Stair Climber</option>
+                                <option value="jumping-rope">🪢 Jump Rope</option>
+                                <option value="other">🔄 Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="detailed-duration">Duration:</label>
+                            <div class="duration-input">
+                                <input type="number" id="detailed-duration" min="1" required>
+                                <select id="detailed-duration-unit">
+                                    <option value="minutes">minutes</option>
+                                    <option value="hours">hours</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="distance">Distance:</label>
+                            <div class="distance-input">
+                                <input type="number" id="distance" step="0.1" min="0" placeholder="Optional">
+                                <select id="distance-unit">
+                                    <option value="km">km</option>
+                                    <option value="miles">miles</option>
+                                    <option value="meters">meters</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="avg-heart-rate">Avg Heart Rate:</label>
+                            <input type="number" id="avg-heart-rate" min="0" max="300" placeholder="bpm">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="max-heart-rate">Max Heart Rate:</label>
+                            <input type="number" id="max-heart-rate" min="0" max="300" placeholder="bpm">
+                        </div>
+                        <div class="form-group">
+                            <label for="detailed-calories">Calories Burned:</label>
+                            <input type="number" id="detailed-calories" min="0" placeholder="kcal">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailed-notes">Session Notes:</label>
+                        <textarea id="detailed-notes" rows="3" placeholder="Route, weather, how you felt, achievements, etc."></textarea>
+                    </div>
+
+                    <button type="submit" class="primary-btn">📊 Log Detailed Session</button>
+                </form>
+
+                <!-- Interval Training Form -->
+                <form id="intervals-form" class="input-form hidden">
+                    <h3>Interval Training</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="interval-type">Activity:</label>
+                            <select id="interval-type" required>
+                                <option value="running">🏃 Running</option>
+                                <option value="cycling">🚴 Cycling</option>
+                                <option value="rowing">🚣 Rowing</option>
+                                <option value="hiit">🔥 HIIT</option>
+                                <option value="sprints">⚡ Sprints</option>
+                                <option value="other">🔄 Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="intervals-count">Number of Intervals:</label>
+                            <input type="number" id="intervals-count" min="1" max="50" value="5" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="work-duration">Work Duration:</label>
+                            <div class="duration-input">
+                                <input type="number" id="work-duration" min="1" value="30" required>
+                                <select id="work-unit">
+                                    <option value="seconds">seconds</option>
+                                    <option value="minutes">minutes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="rest-duration">Rest Duration:</label>
+                            <div class="duration-input">
+                                <input type="number" id="rest-duration" min="1" value="30" required>
+                                <select id="rest-unit">
+                                    <option value="seconds">seconds</option>
+                                    <option value="minutes">minutes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interval-notes">Notes:</label>
+                        <textarea id="interval-notes" rows="2" placeholder="How challenging was it? Any specific goals achieved?"></textarea>
+                    </div>
+
+                    <button type="submit" class="primary-btn">🔥 Log Interval Session</button>
+                </form>
+
+                <!-- Cardio Log with Filters -->
+                <div class="cardio-log-section">
+                    <div class="log-controls">
+                        <h3>📋 Cardio History</h3>
+                        <div class="cardio-filters">
+                            <select id="cardio-filter-type">
+                                <option value="all">All Activities</option>
+                                <option value="running">Running</option>
+                                <option value="cycling">Cycling</option>
+                                <option value="swimming">Swimming</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <select id="cardio-filter-period">
+                                <option value="all">All Time</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="year">This Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="cardio-log" class="log-container"></div>
+                </div>
+
+                <!-- Cardio Stats Summary -->
+                <div class="cardio-stats">
+                    <div class="stat-card">
+                        <h4>📊 This Week</h4>
+                        <div class="stat-value" id="week-cardio-time">0 min</div>
+                        <div class="stat-label">Total Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>🔥 This Month</h4>
+                        <div class="stat-value" id="month-cardio-sessions">0</div>
+                        <div class="stat-label">Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>💪 Average</h4>
+                        <div class="stat-value" id="avg-session-duration">0 min</div>
+                        <div class="stat-label">Session Length</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>🎯 Longest</h4>
+                        <div class="stat-value" id="longest-session">0 min</div>
+                        <div class="stat-label">Session</div>
+                    </div>
+                </div>
             </section>
 
             <!-- Goals View -->
@@ -328,62 +753,468 @@
 
             <!-- Settings View -->
             <section id="settings" class="view">
-                <h2>Settings</h2>
+                <h2>⚙️ Settings</h2>
+                
+                <!-- Settings Navigation -->
+                <div class="settings-nav">
+                    <button class="settings-tab-btn active" data-tab="general">🔧 General</button>
+                    <button class="settings-tab-btn" data-tab="workout">🏋️ Workout</button>
+                    <button class="settings-tab-btn" data-tab="timer">⏱️ Timer</button>
+                    <button class="settings-tab-btn" data-tab="notifications">🔔 Notifications</button>
+                    <button class="settings-tab-btn" data-tab="data">💾 Data</button>
+                    <button class="settings-tab-btn" data-tab="advanced">⚡ Advanced</button>
+                </div>
+
                 <div class="settings-container">
-                    <div class="setting-group">
-                        <label class="setting-label">
-                            <span>Dark Mode</span>
-                            <input type="checkbox" id="dark-mode-toggle">
-                        </label>
-                    </div>
-                    <div class="setting-group">
-                        <label class="setting-label">
-                            <span>Weight Unit</span>
-                            <select id="weight-unit">
-                                <option value="lbs">lbs</option>
-                                <option value="kg">kg</option>
-                            </select>
-                        </label>
-                    </div>
-                    <div class="setting-group">
-                        <h3>Water Intake Settings</h3>
-                        <div class="form-group">
-                            <label for="user-weight">Weight:</label>
-                            <div class="input-group">
-                                <input type="number" id="user-weight" min="0" step="0.1" required>
-                                <select id="user-weight-unit">
-                                    <option value="kg">kg</option>
-                                    <option value="lbs">lbs</option>
-                                </select>
+                    
+                    <!-- General Settings -->
+                    <div id="general-settings" class="settings-tab active">
+                        <div class="settings-section">
+                            <h3>🎨 Appearance</h3>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Theme</span>
+                                    <select id="theme-select">
+                                        <option value="auto">Auto (System)</option>
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Accent Color</span>
+                                    <select id="accent-color">
+                                        <option value="green">Green (Default)</option>
+                                        <option value="blue">Blue</option>
+                                        <option value="purple">Purple</option>
+                                        <option value="orange">Orange</option>
+                                        <option value="red">Red</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Animation Speed</span>
+                                    <select id="animation-speed">
+                                        <option value="fast">Fast</option>
+                                        <option value="normal">Normal</option>
+                                        <option value="slow">Slow</option>
+                                        <option value="none">No Animations</option>
+                                    </select>
+                                </label>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="user-age">Age:</label>
-                            <input type="number" id="user-age" min="0" required>
+
+                        <div class="settings-section">
+                            <h3>📐 Units & Display</h3>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Weight Unit</span>
+                                    <select id="weight-unit">
+                                        <option value="lbs">Pounds (lbs)</option>
+                                        <option value="kg">Kilograms (kg)</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Date Format</span>
+                                    <select id="date-format">
+                                        <option value="us">MM/DD/YYYY (US)</option>
+                                        <option value="eu">DD/MM/YYYY (EU)</option>
+                                        <option value="iso">YYYY-MM-DD (ISO)</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Time Format</span>
+                                    <select id="time-format">
+                                        <option value="12">12-hour (AM/PM)</option>
+                                        <option value="24">24-hour</option>
+                                    </select>
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="activity-level">Activity Level:</label>
-                            <select id="activity-level">
-                                <option value="low">Low</option>
-                                <option value="moderate">Moderate</option>
-                                <option value="high">High</option>
-                            </select>
+
+                        <div class="settings-section">
+                            <h3>🏃 User Profile</h3>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Experience Level</span>
+                                    <select id="experience-level">
+                                        <option value="beginner">Beginner (0-6 months)</option>
+                                        <option value="novice">Novice (6-12 months)</option>
+                                        <option value="intermediate">Intermediate (1-3 years)</option>
+                                        <option value="advanced">Advanced (3+ years)</option>
+                                        <option value="expert">Expert (5+ years)</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Primary Goal</span>
+                                    <select id="primary-goal">
+                                        <option value="strength">Build Strength</option>
+                                        <option value="muscle">Build Muscle</option>
+                                        <option value="endurance">Improve Endurance</option>
+                                        <option value="weight-loss">Lose Weight</option>
+                                        <option value="general">General Fitness</option>
+                                        <option value="performance">Athletic Performance</option>
+                                    </select>
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="climate">Climate:</label>
-                            <select id="climate">
-                                <option value="normal">Normal</option>
-                                <option value="hot">Hot/Dry</option>
-                            </select>
-                        </div>
-                        <button onclick="updateWaterGoal()" class="secondary-btn">Update Water Goal</button>
                     </div>
-                    <div class="setting-group">
-                        <h3>Data Management</h3>
-                        <button id="export-data" class="secondary-btn">Export Data</button>
-                        <button id="import-data" class="secondary-btn">Import Data</button>
-                        <input type="file" id="import-input" accept=".json" style="display: none;">
-                        <button id="clear-data" class="danger-btn">Clear All Data</button>
+
+                    <!-- Workout Settings -->
+                    <div id="workout-settings" class="settings-tab">
+                        <div class="settings-section">
+                            <h3>🎯 Training Preferences</h3>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Default Training Type</span>
+                                    <select id="default-training-type">
+                                        <option value="straight">Straight Sets</option>
+                                        <option value="pyramid">Pyramid</option>
+                                        <option value="superset">Superset</option>
+                                        <option value="drop-set">Drop Set</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Default Sets</span>
+                                    <input type="number" id="default-sets" min="1" max="10" value="3">
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Default Reps</span>
+                                    <input type="number" id="default-reps" min="1" max="50" value="10">
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Auto-suggest rest times</span>
+                                    <input type="checkbox" id="auto-suggest-rest" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Show exercise descriptions</span>
+                                    <input type="checkbox" id="show-exercise-descriptions" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>📊 Progress Tracking</h3>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Enable achievement notifications</span>
+                                    <input type="checkbox" id="achievement-notifications" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Show progress recommendations</span>
+                                    <input type="checkbox" id="progress-recommendations" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Progress calculation method</span>
+                                    <select id="progress-calculation">
+                                        <option value="comprehensive">Comprehensive (All factors)</option>
+                                        <option value="volume">Volume-based</option>
+                                        <option value="frequency">Frequency-based</option>
+                                        <option value="simple">Simple (Workout count)</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>💧 Water Intake</h3>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Body Weight</span>
+                                    <div class="input-group">
+                                        <input type="number" id="user-weight" min="0" step="0.1" placeholder="Enter weight">
+                                        <select id="user-weight-unit">
+                                            <option value="kg">kg</option>
+                                            <option value="lbs">lbs</option>
+                                        </select>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Age</span>
+                                    <input type="number" id="user-age" min="0" max="120" placeholder="Enter age">
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Activity Level</span>
+                                    <select id="activity-level">
+                                        <option value="low">Low (Sedentary)</option>
+                                        <option value="moderate">Moderate (3-4 workouts/week)</option>
+                                        <option value="high">High (5+ workouts/week)</option>
+                                        <option value="extreme">Extreme (Professional athlete)</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Climate</span>
+                                    <select id="climate">
+                                        <option value="normal">Normal</option>
+                                        <option value="hot">Hot/Dry</option>
+                                        <option value="humid">Hot/Humid</option>
+                                        <option value="cold">Cold</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <button onclick="updateWaterGoal()" class="primary-btn">Update Water Goal</button>
+                        </div>
+                    </div>
+
+                    <!-- Timer Settings -->
+                    <div id="timer-settings" class="settings-tab">
+                        <div class="settings-section">
+                            <h3>⏰ Rest Timer Preferences</h3>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Default Rest Time (Strength)</span>
+                                    <select id="rest-strength">
+                                        <option value="180">3 minutes</option>
+                                        <option value="240">4 minutes</option>
+                                        <option value="300">5 minutes</option>
+                                        <option value="360">6 minutes</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Default Rest Time (Hypertrophy)</span>
+                                    <select id="rest-hypertrophy">
+                                        <option value="60">1 minute</option>
+                                        <option value="90">1.5 minutes</option>
+                                        <option value="120">2 minutes</option>
+                                        <option value="150">2.5 minutes</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Default Rest Time (Endurance)</span>
+                                    <select id="rest-endurance">
+                                        <option value="30">30 seconds</option>
+                                        <option value="45">45 seconds</option>
+                                        <option value="60">1 minute</option>
+                                        <option value="90">1.5 minutes</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Auto-start timer after logging</span>
+                                    <input type="checkbox" id="auto-start-timer">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Play sound alerts</span>
+                                    <input type="checkbox" id="timer-sounds" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Warning alert time</span>
+                                    <select id="warning-time">
+                                        <option value="5">5 seconds before</option>
+                                        <option value="10">10 seconds before</option>
+                                        <option value="15">15 seconds before</option>
+                                        <option value="30">30 seconds before</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div id="notifications-settings" class="settings-tab">
+                        <div class="settings-section">
+                            <h3>🔔 Push Notifications</h3>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Enable browser notifications</span>
+                                    <input type="checkbox" id="browser-notifications">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <p class="setting-description">Receive notifications even when the app is not active</p>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Achievement unlocks</span>
+                                    <input type="checkbox" id="achievement-alerts" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Rest timer completion</span>
+                                    <input type="checkbox" id="timer-notifications" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Workout reminders</span>
+                                    <input type="checkbox" id="workout-reminders">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>📱 In-App Notifications</h3>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Notification display time</span>
+                                    <select id="notification-duration">
+                                        <option value="2000">2 seconds</option>
+                                        <option value="3000">3 seconds</option>
+                                        <option value="5000">5 seconds</option>
+                                        <option value="7000">7 seconds</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Notification position</span>
+                                    <select id="notification-position">
+                                        <option value="top-right">Top Right</option>
+                                        <option value="top-left">Top Left</option>
+                                        <option value="bottom-right">Bottom Right</option>
+                                        <option value="bottom-left">Bottom Left</option>
+                                        <option value="center">Center</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div id="data-settings" class="settings-tab">
+                        <div class="settings-section">
+                            <h3>💾 Data Management</h3>
+                            <div class="data-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Total Workouts:</span>
+                                    <span class="stat-value" id="total-workouts">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Storage Used:</span>
+                                    <span class="stat-value" id="storage-used">0 KB</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Last Backup:</span>
+                                    <span class="stat-value" id="last-backup">Never</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>📤 Export Data</h3>
+                            <div class="export-options">
+                                <button id="export-all-data" class="primary-btn">📋 Export All Data</button>
+                                <button id="export-workouts" class="secondary-btn">🏋️ Export Workouts Only</button>
+                                <button id="export-templates" class="secondary-btn">📝 Export Templates</button>
+                                <button id="export-progress" class="secondary-btn">📊 Export Progress Data</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>📥 Import Data</h3>
+                            <div class="import-options">
+                                <button id="import-data" class="secondary-btn">📁 Import from File</button>
+                                <input type="file" id="import-input" accept=".json" style="display: none;">
+                                <p class="setting-description">Import data from a backup file or another fitness tracker</p>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>🗑️ Reset Options</h3>
+                            <div class="reset-options">
+                                <button id="clear-workouts" class="warning-btn">Clear Workout History</button>
+                                <button id="clear-achievements" class="warning-btn">Reset Achievements</button>
+                                <button id="clear-all-data" class="danger-btn">🚨 Clear All Data</button>
+                                <p class="setting-description">⚠️ These actions cannot be undone. Export your data first!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div id="advanced-settings" class="settings-tab">
+                        <div class="settings-section">
+                            <h3>⚡ Performance</h3>
+                            <div class="setting-group">
+                                <label class="setting-label toggle-label">
+                                    <span>Enable debug mode</span>
+                                    <input type="checkbox" id="debug-mode">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <p class="setting-description">Show additional logging and performance metrics</p>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">
+                                    <span>Data sync frequency</span>
+                                    <select id="sync-frequency">
+                                        <option value="realtime">Real-time</option>
+                                        <option value="30">Every 30 seconds</option>
+                                        <option value="60">Every minute</option>
+                                        <option value="300">Every 5 minutes</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>🔧 Developer Options</h3>
+                            <div class="setting-group">
+                                <button id="force-cache-refresh" class="secondary-btn">🔄 Force Cache Refresh</button>
+                                <button id="reset-app-state" class="warning-btn">🔄 Reset App State</button>
+                                <button id="download-logs" class="secondary-btn">📋 Download Debug Logs</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>ℹ️ About</h3>
+                            <div class="about-info">
+                                <div class="info-item">
+                                    <span class="info-label">Version:</span>
+                                    <span class="info-value">2.0.0</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Last Updated:</span>
+                                    <span class="info-value" id="last-updated">Loading...</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Browser:</span>
+                                    <span class="info-value" id="browser-info">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -401,6 +1232,9 @@
     <script src="js/charts.js"></script>
     <script src="js/weight.js"></script>
     <script src="js/circuit.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/settings.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

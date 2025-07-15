@@ -605,4 +605,10 @@ class CalendarManager {
 }
 
 // Create a global instance
-const calendar = new CalendarManager();
+try {
+    console.log('Creating CalendarManager instance...');
+    window.calendar = new CalendarManager();
+    console.log('CalendarManager created successfully');
+} catch (error) {
+    console.error('Error creating CalendarManager:', error);
+}
